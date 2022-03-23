@@ -1,5 +1,3 @@
-using System;
-
 namespace TestingOfApplicants.Models
 {
     public class ErrorViewModel
