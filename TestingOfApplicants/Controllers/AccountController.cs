@@ -20,75 +20,48 @@ namespace TestingOfApplicants.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterModel model)
+        public async Task<IActionResult> Login(string name)
         {
             if (ModelState.IsValid)
             {
-                User user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-                if (user == null)
+                name = name.Trim();
+
+                if (name != null && !name.Equals(""))
                 {
-                    //Добавляем пользователя
-                    user = new User
-                    {
-                        Email = model.Email,
-                        Password = model.Password
-                    };
+                    User user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.mName == name);
+
                     if (user != null)
                     {
-                        ModelState.AddModelError("","Аккаунт по введенной почте уже зарегистрирован");
-                    }
+                        await Authenticate(user);
 
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
-                    await Authenticate(user);
-                    return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Некорректные логин и(или) пароль");
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        user = new User
+                        {
+                            mName = name
+                        };
+
+                        _context.Users.Add(user);
+
+                        await _context.SaveChangesAsync();
+                        await Authenticate(user);
+
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
             }
-            return View(model);
-        }
-
-        [HttpGet]
-        public IActionResult Login()
-        {
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                User user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
-                if (user != null)
-                {
-                    await Authenticate(user); // аутентификация
-
-                    return RedirectToAction("Index", "Home");
-                }
-                ModelState.AddModelError("", "Некорректные логин и(или) пароль");
-            }
-            return View(model);
-        }
         private async Task Authenticate(User user)
         {
             // создаем один claim
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email)
+                new Claim(ClaimsIdentity.DefaultNameClaimType, user.mName)
             };
             // создаем объект ClaimsIdentity
             ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
