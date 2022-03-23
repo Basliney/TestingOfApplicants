@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace TestingOfApplicants.Models
+﻿namespace TestingOfApplicants.Models
 {
     public class User
     {
