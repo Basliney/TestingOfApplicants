@@ -9,32 +9,49 @@ using TestingOfApplicants.Models;
 
 namespace TestingOfApplicants.Controllers
 {
+    /// <summary>
+    /// Класс для определения пользователя
+    /// </summary>
     public class AccountController : Controller
     {
-        private ApplicationContext _context;
+        private ApplicationContext _context;    // База данных
 
         public AccountController(ApplicationContext context)
         {
             _context = context;
         }
 
+        /// <summary>
+        /// Ассинхронный метод для обработки входящего пользователя.
+        /// </summary>
+        /// <param name="name">ФИО пользователя (с сайта КубГУ)</param>
+        /// <returns></returns>
         public async Task<IActionResult> Login(string name)
         {
             if (ModelState.IsValid)
             {
-                name = name.Trim();
-
+                /* 
+                 * На сайт КубГУ установлено расширение, которое не позволяет нажимать на ссылку 
+                 * тестирования, если пользователь не аутентифицирован.
+                 * Но если набрать в поисковой строке localhost:44390/Account/Login то ссылка направит на 
+                 * аутентификацию в системе тестирования. Поэтому следует проверять параметр name на пустоту
+                */
                 if (name != null && !name.Equals(""))
                 {
+                    name = name.Trim(); // Удаляем лишние пробелы
+
+                    // Ищем пользователя в базе данных
                     User user = await _context.Users
                         .FirstOrDefaultAsync(u => u.mName == name);
 
+                    // Если нашли, то вызываем метод аутентификации
                     if (user != null)
                     {
                         await Authenticate(user);
 
                         return RedirectToAction("Index", "Home");
                     }
+                    // Если не нашли, то надо регистрировать в базе данных
                     else
                     {
                         user = new User
@@ -49,6 +66,11 @@ namespace TestingOfApplicants.Controllers
 
                         return RedirectToAction("Index", "Home");
                     }
+                }
+                else
+                {
+                    // Если ФИО нет в ссылке, то переходим на сайт КубГУ
+                    return Redirect("https://www.kubsu.ru/");
                 }
             }
             return View();
