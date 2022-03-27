@@ -5,5 +5,7 @@
         public int Id { get; set; }
 
         public string mName { get; set; }
+
+        public int Role { get; set; }
     }
 }

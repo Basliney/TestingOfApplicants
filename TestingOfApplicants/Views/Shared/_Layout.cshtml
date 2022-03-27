@@ -27,6 +27,17 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @{
+                            if (StaticData.Me != null)
+                            {
+                                if (StaticData.Me.Role == 1)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Editing" asp-action="CreateTest">Добавить тест</a>
+                                    </li>
+                                }
+                            }
+                        }
                     </ul>
                 </div>
                 <div>

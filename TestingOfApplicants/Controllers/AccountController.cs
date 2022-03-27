@@ -49,6 +49,7 @@ namespace TestingOfApplicants.Controllers
                     {
                         await Authenticate(user);
 
+                        StaticData.Me = user;
                         return RedirectToAction("Index", "Home");
                     }
                     // Если не нашли, то надо регистрировать в базе данных
@@ -64,6 +65,7 @@ namespace TestingOfApplicants.Controllers
                         await _context.SaveChangesAsync();
                         await Authenticate(user);
 
+                        StaticData.Me = user;
                         return RedirectToAction("Index", "Home");
                     }
                 }
