@@ -18,6 +18,36 @@ namespace TestingOfApplicants.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.0");
 
+            modelBuilder.Entity("TestingOfApplicants.Models.Tests.Question", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("Answer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ask")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FakeAnswer1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FakeAnswer2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FakeAnswer3")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("HeaderId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Questions");
+                });
+
             modelBuilder.Entity("TestingOfApplicants.Models.Tests.TestHeader", b =>
                 {
                     b.Property<int>("Id")

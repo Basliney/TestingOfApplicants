@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TestingOfApplicants.Models;
 using TestingOfApplicants.Models.Tests;
@@ -56,22 +58,55 @@ namespace TestingOfApplicants.Controllers
         // GET: EditingController/Edit/5
         public ActionResult Edit(int id)
         {
-            return View();
+            if (StaticData.Me.Role == 1)
+            {
+                TestHeader header = _context.TestHeaders.Where(x => x.Id == id).First();
+                StaticData.ChoosedHeader = id;
+                return View(header);
+            }
+            return RedirectToAction("Index", "Home");
         }
 
         // POST: EditingController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<ActionResult> Edit(string title, string description, string ask, string fakeAnswer1, string fakeAnswer2, string fakeAnswer3, string Answ)
         {
-            try
+            if (StaticData.Me.Role == 1)
             {
-                return RedirectToAction();
+                try
+                {
+                    Question questionForAdd = new Question()
+                    {
+                        HeaderId = StaticData.ChoosedHeader,
+                        Ask = ask,
+                        FakeAnswer1 = fakeAnswer1,
+                        FakeAnswer2 = fakeAnswer2,
+                        FakeAnswer3 = fakeAnswer3,
+                        Answer = Answ
+                    };
+                    _context.Questions.Add(questionForAdd);
+
+                    TestHeader header = _context.TestHeaders.Where(x => x.Id == StaticData.ChoosedHeader).FirstOrDefault();
+                    
+                    if (header!= null)
+                    {
+                        if (!title.Equals(header.Title) || !description.Equals(header.Description))
+                        {
+                            header.Title = title; header.Description = description;
+                        }
+                    }
+
+                    _context.Update(header);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Edit", "Editing", new {id=StaticData.ChoosedHeader});
+                }
+                catch
+                {
+                    return View();
+                }
             }
-            catch
-            {
-                return View();
-            }
+            return RedirectToAction("Index", "Home");
         }
     }
 }

@@ -1,0 +1,40 @@
+﻿<style>
+    hr{
+        border: none;
+        background-color:gray;
+        color: black;
+        height:2px;
+    }
+    #EditBlock{
+        text-align:center;
+    }
+    .editText{
+        border-top:none;
+        border-left:none;
+        border-right:none;
+        max-height:50px;
+        width:450px;
+    }
+    #goal{
+        background-color:lightgreen;
+    }
+</style>
+<div id="EditBlock">
+    <form asp-action="Edit" asp-controller="Editing" asp-anti-forgery="true">
+    <h3>Название:</h3>
+    <input type="text" name="title" value="@Model.Title" class="editText"/>
+    <h3>Описание:</h3>
+    <textarea name="description" class="editText">@Model.Description</textarea>
+    <br /><hr><br />
+    <h3>Вопрос:</h3>
+    <input type="text" name="ask"class="editText"/>
+    <p>Неверные ответы:</p>
+    <p>1.<input type="text" name="fakeAnswer1" class="editText"/></p><br />
+    <p>2.<input type="text" name="fakeAnswer2" class="editText"/></p><br />
+    <p>3.<input type="text" name="fakeAnswer3" class="editText"/></p><br />
+    <p>Верный ответ:</p>
+    <input type="text" name="Answ" class="editText" id="goal"/>
+    <br /><br />
+    <input type="submit" value="Добавить вопрос"/>
+    </form>
+</div>

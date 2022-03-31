@@ -1,8 +1,51 @@
-﻿@{
+﻿@using TestingOfApplicants.Models.Tests
+@{
     ViewData["Title"] = "Home Page";
+    List<TestHeader> list = Model;
+    Random rnd = new Random();
+    int color = rnd.Next(75, 180); 
+    int countRow = list.Count;
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Добро пожаловать!</h1>
+    <p>Мы рады видеть вас, @StaticData.Me.mName.Split()[1], у нас на сайте тестирования. Ниже вы можете найти все доступные тесты для прохождения</p>
+    
+    @while (countRow % 4 != 0)
+    {
+        countRow++;
+    }
+    <div class="row">
+    @for(int i = 0; i < 4; i++)
+    {
+        <div class="column">
+            @for(int j = 0; j < countRow / 4;j++){
+                @if (j + i * countRow / 4 >= list.Count) break;
+                <div class="questionsTile" style="background:rgb(@color, @color, @color); height: 250px; @GetAnimation()">
+                    <h3 class="testHeader">@list[j+i*countRow / 4].Title</h3>
+                    <p class="testDescription">@list[j+i*countRow / 4].Description</p>
+                        @{
+                            if (StaticData.Me.Role == 1)
+                            {
+                                @Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = list[j+i*countRow / 4].Id});
+                            }
+                        }
+                        <br/>
+                        <div class="buttons">
+                            <a class="startButton" href="#">Начать прохождение</a>
+                        </div>
+                </div>@*questionTile*@
+                color = rnd.Next(75, 180); 
+            }
+        </div>@*column*@
+    }
+    </div> @*row*@
 </div>
+
+@{
+    string GetAnimation()
+    {
+        int delay = rnd.Next(2,7);
+        return $"-webkit-animation: pulsing {delay}s infinite; animation: pulsing {delay}s infinite;";
+    }
+}

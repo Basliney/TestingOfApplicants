@@ -9,8 +9,8 @@ using TestingOfApplicants.Models;
 namespace TestingOfApplicants.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220327110443__addDataBase")]
-    partial class _addDataBase
+    [Migration("20220327125622_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -19,6 +19,24 @@ namespace TestingOfApplicants.Migrations
                 .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.0");
+
+            modelBuilder.Entity("TestingOfApplicants.Models.Tests.TestHeader", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TestHeaders");
+                });
 
             modelBuilder.Entity("TestingOfApplicants.Models.User", b =>
                 {
