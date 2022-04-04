@@ -1,0 +1,107 @@
+﻿@using TestingOfApplicants.Models;
+@using TestingOfApplicants.Models.Tests
+@{
+    Random rnd = new Random();
+    List<string> answers;
+    string style = "visibility:hidden;";
+    string numbersOfAnswers = "";
+}
+<div class="testCard">
+    <h3 style="margin-bottom:50px;">@StaticData.header.Title</h3>
+    <div id="timerVisual"></div>
+    <div id="startCard">
+        <p>Зелёная полоска сверху &#8593; это таймер, после нажатия кнопки "Начать"<br />он 
+            начнет уменьшаться.</p>
+        <h3>Название теста: @StaticData.header.Title</h3>
+        <h3>Описание: @StaticData.header.Description</h3>
+        <p>Вопросов @Model.Count</p>
+        @{
+            int timeMin = Model.Count * 40 / 60, timeSec = Model.Count * 40 % 60;
+        }
+        <p>Максимальное время прохождения @timeMin мин. @timeSec сек.</p>
+        <input type="button" class="buttonStart" onclick="startTest();" value="Начать"/>
+    </div>
+    @{
+        int i = 0;
+        foreach(var item in Model)
+        {
+            string name = "Question";//+i
+
+            <div name=@name class="questionCard" style=@style>
+                @{
+                    string ask = item.Ask;
+                    int askHeight = ask.Split('\n').Length + 1;   // Вычисление высоты textarea
+                    <textarea class="Ask unselectable" readonly disabled rows="@askHeight" cols="100" style="margin-bottom:30px;">@ask</textarea>
+                    GetQuestions(item);
+                    <div class="answers">
+                        <input type="button" class="answer" onClick="changeQuestion(0);" value="@answers[0]">
+                        <input type="button" class="answer" onClick="changeQuestion(1);" value="@answers[1]">
+                        <input type="button" class="answer" onClick="changeQuestion(2);" value="@answers[2]">
+                        <input type="button" class="answer" onClick="changeQuestion(3);" value="@answers[3]">
+                    </div>
+                    i++;
+                }
+            </div>
+        }
+        <p id="notAnswer" style="visibility:hidden;">@numbersOfAnswers</p>
+        <div id="Result" class="questionCard" style="visibility:hidden;">
+            <h3 id=testResult></h3>
+            <form asp-action="ThrowData" asp-controller="Test" asp-anti-forgery="true">
+                <h3 id="testResult"></h3>
+                <p id="countOfTrue"></p>
+                <input type="hidden" name ="countToDB" id="countOfTrueDB">
+                <input type="submit" class="finishBtn" value="Завершить">
+            </form>
+        </div>
+        <p id="TestP"></p>
+    }
+</div>
+
+@{
+    void GetQuestions(Question question)
+    {
+        switch (rnd.Next(0, 4))
+        {
+            case 0:
+                answers = new List<string>
+                {
+                    question.Answer,
+                    question.FakeAnswer1,
+                    question.FakeAnswer2,
+                    question.FakeAnswer3
+                };
+                numbersOfAnswers+=0;
+                break;
+            case 1:
+                answers = new List<string>
+                {
+                    question.FakeAnswer1,
+                    question.Answer,
+                    question.FakeAnswer2,
+                    question.FakeAnswer3
+                };
+                numbersOfAnswers+=1;
+                break;            
+            case 2:
+                answers = new List<string>
+                {
+                    question.FakeAnswer1,
+                    question.FakeAnswer2,
+                    question.Answer,
+                    question.FakeAnswer3
+                };
+                numbersOfAnswers+=2;
+                break;            
+            default:
+                answers = new List<string>
+                {
+                    question.FakeAnswer1,
+                    question.FakeAnswer2,
+                    question.FakeAnswer3,
+                    question.Answer
+                };
+                numbersOfAnswers+=3;
+                break;        
+        }
+    }
+}

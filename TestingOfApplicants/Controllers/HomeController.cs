@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -41,7 +42,10 @@ namespace TestingOfApplicants.Controllers
                     return Redirect("https://Kubsu.ru");
                 }
             }
-            return View(await _context.TestHeaders.ToListAsync());
+            List<TestHeader> testHeaders = await _context.TestHeaders.ToListAsync();
+            StaticData.completedTestsDto = await _context.CompletedTestsDto.ToListAsync();
+
+            return View(testHeaders);
         }
 
         public IActionResult Privacy()

@@ -5,6 +5,7 @@
     Random rnd = new Random();
     int color = rnd.Next(75, 180); 
     int countRow = list.Count;
+    bool flag = false;
 }
 
 <div class="text-center">
@@ -21,21 +22,27 @@
         <div class="column">
             @for(int j = 0; j < countRow / 4;j++){
                 @if (j + i * countRow / 4 >= list.Count) break;
-                <div class="questionsTile" style="background:rgb(@color, @color, @color); height: 250px; @GetAnimation()">
+                <div class="questionsTile" style="background:@GetColor(j+i*countRow / 4); height: 250px; @GetAnimation()">
                     <h3 class="testHeader">@list[j+i*countRow / 4].Title</h3>
                     <p class="testDescription">@list[j+i*countRow / 4].Description</p>
                         @{
                             if (StaticData.Me.Role == 1)
                             {
-                                @Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = list[j+i*countRow / 4].Id});
+                                @Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = list[j+i*countRow / 4].Id})
                             }
                         }
                         <br/>
                         <div class="buttons">
-                            <a class="startButton" href="#">Начать прохождение</a>
+                            @if(flag)
+                            {
+                                flag = false;
+                            }
+                            else
+                            {
+                                @Html.RouteLink("Начать прохождение", new {controller = "Test", action = "Index", id = list[j+i*countRow / 4].Id},new { @class = "startButton"})
+                            }
                         </div>
                 </div>@*questionTile*@
-                color = rnd.Next(75, 180); 
             }
         </div>@*column*@
     }
@@ -47,5 +54,19 @@
     {
         int delay = rnd.Next(2,7);
         return $"-webkit-animation: pulsing {delay}s infinite; animation: pulsing {delay}s infinite;";
+    }
+
+    string GetColor(int number)
+    {
+        foreach (var item in StaticData.completedTestsDto) {
+            if (list[number].Id == item.TestId && item.UserId == StaticData.Me.Id)
+            {
+                var col = rnd.Next(70, 100);
+                flag = true;
+                return $"rgb({col},{128},{col})";
+            }
+        }
+        color = rnd.Next(75, 180); 
+        return $"rgb({color},{color},{color})";
     }
 }

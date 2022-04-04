@@ -1,4 +1,5 @@
-﻿using TestingOfApplicants.Models.Tests;
+﻿using System.Collections.Generic;
+using TestingOfApplicants.Models.Tests;
 
 namespace TestingOfApplicants.Models
 {
@@ -6,5 +7,9 @@ namespace TestingOfApplicants.Models
     {
         public static User Me { get; set; }
         public static int ChoosedHeader { get; set; }
+
+        public static List<CompletedTestDto> completedTestsDto { get; set; }
+
+        public static TestHeader header { get; set; }
     }
 }

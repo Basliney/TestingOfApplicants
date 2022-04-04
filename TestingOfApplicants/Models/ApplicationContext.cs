@@ -11,6 +11,8 @@ namespace TestingOfApplicants.Models
 
         public DbSet<Question> Questions { get; set; }
 
+        public DbSet<CompletedTestDto> CompletedTestsDto { get; set; }
+
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
             Database.Migrate();
