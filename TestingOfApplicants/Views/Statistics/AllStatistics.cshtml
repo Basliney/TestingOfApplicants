@@ -1,0 +1,70 @@
+﻿@using TestingOfApplicants.Models
+@using TestingOfApplicants.Models.ProgramStaticFiles.Map
+@using TestingOfApplicants.Models.Tests
+@{
+    ViewData["Title"] = "Статистика";
+    List<User> users = Model.users;
+    List<TestHeader> headers = Model.headers;
+    List<CompletedTestDto> completedTests = Model.completedTests;
+
+    bool find = false;
+}
+
+<div class="text-center">
+    @{
+        <div id="finder">
+            <input type="text" id="Keyword" placeholder="Иванов Иван Иванович"/>
+            <button id="search" >Поиск</button>
+        </div>
+        if (find == false)
+        {
+            <table border=1>
+                <tr><th>ID <br /> пользователя</th><th>ФИО</th><th>Кол-во пройденных тестов</th><th>Процент от всех тестов</th></tr>
+                @{
+                    int countAllTests = headers.Count;
+                    foreach (var user in users)
+                    {
+                        int countCompleted = completedTests.Where(x => x.UserId == user.Id).Count();
+                        <tr><td>@user.Id</td><td><a href="@Url.ActionLink("UserInfo", "User", new {id=user.Id})">@user.mName</a></td><td>@countCompleted</td><td>@(countCompleted*100/countAllTests)</td></tr>
+                    }
+                }
+            </table>
+            Map map = new Map();
+            foreach (var item in completedTests)
+            {
+                map.Add(item.TestId);
+            }
+            <table border=1>
+                @{
+                    <tr><th>Название теста</th><th>Кол-во прохождений</th></tr>
+                    for (int i = 0; i < map.Count; i++)
+                    {
+                        <tr><td>@headers.FirstOrDefault(x=>x.Id == map.Get(i).Key).Title</td><td>@map.Get(i).Value</td></tr>
+                    }
+                }
+            </table>
+            <h3>Самый популярный тест - "@headers.FirstOrDefault(x=>x.Id == map.Popular(true).Key).Title"</h3>
+            <h3>Наименее популярный тест - "@headers.FirstOrDefault(x=>x.Id == map.Popular(false).Key).Title"</h3>
+        }
+    }
+</div>
+
+<style>
+th, td{
+    padding: 10px;
+}
+
+table{
+    margin-bottom:10px;
+}
+</style>
+
+<script>
+    var url = '@Url.Action("DisplaySearchResults", "Statistics")';
+
+    $('#search').click(function() {
+        console.log("asd");
+        var keyWord = $('#Keyword').val();
+        location.href=url +'/'+'?FIOfinder='+keyWord;
+    })
+</script>

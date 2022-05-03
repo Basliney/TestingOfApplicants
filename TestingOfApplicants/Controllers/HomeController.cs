@@ -1,21 +1,51 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using TestingOfApplicants.Models;
+using TestingOfApplicants.Models.Tests;
 
 namespace TestingOfApplicants.Controllers
 {
     public class HomeController : Controller
     {
+        public ApplicationContext _context { get; set; }
+
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, ApplicationContext context)
         {
+            this._context = context;
             _logger = logger;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            if (StaticData.Me == null)
+            {
+                try
+                {
+                    string myName = User
+                            .FindFirst(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value.ToString();
+
+                    StaticData.Me = await _context.Users
+                        .FirstOrDefaultAsync(x => x.mName.Equals(myName));
+
+                    RedirectToAction("Login", "Account");
+                }
+                catch(NullReferenceException e)
+                {
+                    _logger.LogError(e.StackTrace);
+                    return Redirect("https://Kubsu.ru");
+                }
+            }
+            List<TestHeader> testHeaders = await _context.TestHeaders.ToListAsync();
+            StaticData.completedTestsDto = await _context.CompletedTestsDto.ToListAsync();
+
+            return View(testHeaders);
         }
 
         public IActionResult Privacy()

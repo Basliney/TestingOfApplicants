@@ -65,7 +65,183 @@ body {
 .footer {
   position: absolute;
   bottom: 0;
+  max-height: 100px;
   width: 100%;
   white-space: nowrap;
   line-height: 60px; /* Vertically center the text there */
+}
+
+.questionsTile{
+  background: rgb(88, 88, 88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: auto;
+  padding: 10px;
+  margin: 20px;
+  color: white;
+  font-size: 14px;
+  margin-left: 0px;
+  width:auto;
+  min-height:200px;
+  box-shadow: 0px 5px 10px black;
+  border-radius: 5px;
+}
+
+.questionsTile:hover{
+  box-shadow: 0px 2px 10px 2px rgb(35, 61, 206);
+}
+
+@keyframes pulsing {
+  0% {
+    -webkit-transform: scale(0.97, 0.97);
+    transform: scale(0.97, 0.97);
+  }
+  50% {
+    -webkit-transform: scale(1.0, 1.0);
+    transform: scale(1.0, 1.0);
+  }
+  100% {
+    -webkit-transform: scale(0.97, 0.97);
+    transform: scale(0.97, 0.97);
+  }
+}
+
+.row{
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 4px;
+}
+
+.column{
+  flex: 25%;
+  padding: 0 4px;
+}
+
+.buttons{
+  display: flex;
+  flex: 3;
+  flex-direction: row;
+  align-items: flex-end;
+}
+
+
+.startButton{
+  text-decoration: none;
+  white-space: nowrap;
+  max-height: 30px;
+  font-weight: bold;
+  font-size: medium;
+  color: rgb(125, 245, 125);
+}
+
+a.startButton:hover{
+  text-decoration: none;
+  color: rgb(108, 206, 108);
+}
+
+p.testDescription{
+  max-height: 60px;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.testCard{
+  position: relative;
+  padding: 0px;
+  margin: 0px;
+  width: 100%;  
+  margin-bottom: 100px;
+}
+
+.unselectable {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none;   /* Chrome/Safari/Opera */
+  -khtml-user-select: none;    /* Konqueror */
+  -moz-user-select: none;      /* Firefox */
+  -ms-user-select: none;       /* Internet Explorer/Edge */
+  user-select: none;           /* Non-prefixed version, currently
+                                  not supported by any browser */
+}
+
+.questionCard{
+  padding: 20px;
+  width: 100%;
+  min-width: 300px;
+  background-image: linear-gradient(#a5a5a5,#777777);
+  border-radius: 5px;
+  box-shadow: 0px 6px 10px black;
+  position: absolute;
+}
+
+.answer{
+  background-color: rgb(255, 255, 255);
+  box-shadow: 0px 3px 10px rgb(228, 228, 228);
+  border-radius: 5px;
+  padding: 5px;
+  margin: 10px;
+  flex-basis: 45%;
+  height: 100px;
+  max-height: max-content;
+  max-width: 45%;
+  text-align: center;
+  white-space: pre-line;
+}
+
+.answers{
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+
+.Ask{
+  width: fit-content;
+  height: fit-content;
+  background-color: transparent;
+  border: 0cm;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+#countOfTrue{
+  font-weight: bold;
+  font-size: 18px;
+  margin-top: 50px;
+  text-align: center;
+}
+
+.finishBtn{
+  background-color: rgb(255, 255, 255);
+  height: auto;
+  border-radius: 5px;
+  padding: 5px;
+  width: 100%;
+  margin-top: 50px;
+}
+
+#timerVisual{
+  border-radius: 5px;
+  margin-bottom: 10px;
+  box-shadow: 0px 3px 10px rgb(110, 110, 110);
+}
+
+.buttonStart{
+  width: 20%;
+  background-color: rgb(255, 255, 255);
+  border-radius: 5px;
+}
+
+#startCard{
+  width: 100%;
+  padding: 20px;
+  border-radius: 5px;
+  background-image: linear-gradient(#a5a5a5,#777777);
+  text-align: center;
+  color: rgb(255, 255, 255);
+}
+
+#startCard p{
+  color: rgb(255, 255, 255);
+  font-size: 18px;
 }

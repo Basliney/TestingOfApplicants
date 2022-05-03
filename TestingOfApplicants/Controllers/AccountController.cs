@@ -36,7 +36,7 @@ namespace TestingOfApplicants.Controllers
                  * Но если набрать в поисковой строке localhost:44390/Account/Login то ссылка направит на 
                  * аутентификацию в системе тестирования. Поэтому следует проверять параметр name на пустоту
                 */
-                if (name != null && !name.Equals(""))
+                if (name != null && name.Trim().Split().Length >= 2)
                 {
                     name = name.Trim(); // Удаляем лишние пробелы
 
@@ -44,15 +44,8 @@ namespace TestingOfApplicants.Controllers
                     User user = await _context.Users
                         .FirstOrDefaultAsync(u => u.mName == name);
 
-                    // Если нашли, то вызываем метод аутентификации
-                    if (user != null)
-                    {
-                        await Authenticate(user);
-
-                        return RedirectToAction("Index", "Home");
-                    }
-                    // Если не нашли, то надо регистрировать в базе данных
-                    else
+                    // Если не нашли пользователя, то надо регистрировать
+                    if (user == null)
                     {
                         user = new User
                         {
@@ -62,10 +55,11 @@ namespace TestingOfApplicants.Controllers
                         _context.Users.Add(user);
 
                         await _context.SaveChangesAsync();
-                        await Authenticate(user);
-
-                        return RedirectToAction("Index", "Home");
                     }
+                    await Authenticate(user);
+
+                    StaticData.Me = user;
+                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {

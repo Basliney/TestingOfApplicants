@@ -1,14 +1,19 @@
 ﻿@using TestingOfApplicants.Controllers
 @using System.Security.Claims
 
+@{
+    var me = StaticData.Me;
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TestingOfApplicants</title>
+    <title>@ViewData["Title"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
 </head>
 <body>
     <header>
@@ -22,20 +27,34 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Тесты</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @{
+                            if (StaticData.Me != null)
+                            {
+                                if (StaticData.Me.Role != 0)
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" asp-area="" asp-controller="Editing" asp-action="CreateTest">Добавить тест</a>
+                                    </li>
+                                    if (StaticData.Me.Role >= 2)
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link text-dark" asp-area="" asp-controller="Statistics" asp-action="AllStatistics">Статистика</a>
+                                        </li>
+                                    }
+                                }
+                            }
+                        }
                     </ul>
                 </div>
                 <div>
-                    <a class="navbar-brand" asp-area="">@User.FindFirst(x=> x.Type == ClaimsIdentity.DefaultNameClaimType).Value</a>
+                    <a class="navbar-brand" href="@Url.ActionLink("UserInfo", "User", new {id=me.Id})">@me.mName</a>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container" id="mainBlock">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
@@ -46,9 +65,9 @@
             &copy; 2022 - TestingOfApplicants - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/changerQuestion.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

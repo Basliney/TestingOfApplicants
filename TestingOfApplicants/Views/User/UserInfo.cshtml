@@ -1,0 +1,18 @@
+﻿@using TestingOfApplicants.Models.Tests;
+
+@{
+    List<TestHeader> headers = ViewBag.Headers;
+    User user = ViewBag.User;
+}
+
+<div class="text-center">
+    <p>@user.mName</p>
+    @{
+        foreach(var header in headers)
+        {
+            <h3>@header.Title</h3>
+        }
+    }
+</div>
+
+

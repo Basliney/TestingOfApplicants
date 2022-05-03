@@ -1,8 +1,72 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using TestingOfApplicants.Models.Tests
+@{
+    ViewData["Title"] = "Тесты";
+    List<TestHeader> list = Model;
+    Random rnd = new Random();
+    int color = rnd.Next(75, 180); 
+    int countRow = list.Count;
+    bool flag = false;
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Добро пожаловать!</h1>
+    <p>Мы рады видеть вас, @StaticData.Me.mName.Split()[1], у нас на сайте тестирования. Ниже вы можете найти все доступные тесты для прохождения</p>
+    
+    @while (countRow % 4 != 0)
+    {
+        countRow++;
+    }
+    <div class="row">
+    @for(int i = 0; i < 4; i++)
+    {
+        <div class="column">
+            @for(int j = 0; j < countRow / 4;j++){
+                @if (j + i * countRow / 4 >= list.Count) break;
+                <div class="questionsTile" style="background:@GetColor(j+i*countRow / 4); height: 250px; @GetAnimation()">
+                    <h3 class="testHeader">@list[j+i*countRow / 4].Title</h3>
+                    <p class="testDescription">@list[j+i*countRow / 4].Description</p>
+                        @{
+                            if (StaticData.Me.Role != 0)
+                            {
+                                @Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = list[j+i*countRow / 4].Id})
+                            }
+                        }
+                        <br/>
+                        <div class="buttons">
+                            @if(flag)
+                            {
+                                flag = false;
+                            }
+                            else
+                            {
+                                @Html.RouteLink("Начать прохождение", new {controller = "Test", action = "Index", id = list[j+i*countRow / 4].Id},new { @class = "startButton"})
+                            }
+                        </div>
+                </div>@*questionTile*@
+            }
+        </div>@*column*@
+    }
+    </div> @*row*@
 </div>
+
+@{
+    string GetAnimation()
+    {
+        int delay = rnd.Next(2,7);
+        return $"-webkit-animation: pulsing {delay}s infinite; animation: pulsing {delay}s infinite;";
+    }
+
+    string GetColor(int number)
+    {
+        foreach (var item in StaticData.completedTestsDto) {
+            if (list[number].Id == item.TestId && item.UserId == StaticData.Me.Id)
+            {
+                var col = rnd.Next(70, 100);
+                flag = true;
+                return $"rgb({col},{128},{col})";
+            }
+        }
+        color = rnd.Next(75, 180); 
+        return $"rgb({color},{color},{color})";
+    }
+}
