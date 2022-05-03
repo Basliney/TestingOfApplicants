@@ -2,93 +2,86 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TestingOfApplicants.Models;
 
 namespace TestingOfApplicants.Controllers
 {
+    /// <summary>
+    /// Класс для определения пользователя
+    /// </summary>
     public class AccountController : Controller
     {
-        private ApplicationContext _context;
+        private ApplicationContext _context;    // База данных
 
         public AccountController(ApplicationContext context)
         {
             _context = context;
         }
 
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterModel model)
+        /// <summary>
+        /// Ассинхронный метод для обработки входящего пользователя.
+        /// </summary>
+        /// <param name="name">ФИО пользователя (с сайта КубГУ)</param>
+        /// <returns></returns>
+        public async Task<IActionResult> Login(string name)
         {
             if (ModelState.IsValid)
             {
-                User user = await _context.Users.FirstOrDefaultAsync(u => u.Email == model.Email);
-                if (user == null)
+                /* 
+                 * На сайт КубГУ установлено расширение, которое не позволяет нажимать на ссылку 
+                 * тестирования, если пользователь не аутентифицирован.
+                 * Но если набрать в поисковой строке localhost:44390/Account/Login то ссылка направит на 
+                 * аутентификацию в системе тестирования. Поэтому следует проверять параметр name на пустоту
+                */
+                if (name != null && !name.Equals(""))
                 {
-                    //Добавляем пользователя
-                    user = new User
-                    {
-                        Email = model.Email,
-                        Password = model.Password
-                    };
+                    name = name.Trim(); // Удаляем лишние пробелы
+
+                    // Ищем пользователя в базе данных
+                    User user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.mName == name);
+
+                    // Если нашли, то вызываем метод аутентификации
                     if (user != null)
                     {
-                        ModelState.AddModelError("","Аккаунт по введенной почте уже зарегистрирован");
-                    }
+                        await Authenticate(user);
 
-                    _context.Users.Add(user);
-                    await _context.SaveChangesAsync();
-                    await Authenticate(user);
-                    return RedirectToAction("Index", "Home");
+                        return RedirectToAction("Index", "Home");
+                    }
+                    // Если не нашли, то надо регистрировать в базе данных
+                    else
+                    {
+                        user = new User
+                        {
+                            mName = name
+                        };
+
+                        _context.Users.Add(user);
+
+                        await _context.SaveChangesAsync();
+                        await Authenticate(user);
+
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Некорректные логин и(или) пароль");
+                    // Если ФИО нет в ссылке, то переходим на сайт КубГУ
+                    return Redirect("https://www.kubsu.ru/");
                 }
             }
-            return View(model);
-        }
-
-        [HttpGet]
-        public IActionResult Login()
-        {
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                User user = await _context.Users
-                    .FirstOrDefaultAsync(u => u.Email == model.Email && u.Password == model.Password);
-                if (user != null)
-                {
-                    await Authenticate(user); // аутентификация
-
-                    return RedirectToAction("Index", "Home");
-                }
-                ModelState.AddModelError("", "Некорректные логин и(или) пароль");
-            }
-            return View(model);
-        }
         private async Task Authenticate(User user)
         {
             // создаем один claim
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email)
+                new Claim(ClaimsIdentity.DefaultNameClaimType, user.mName)
             };
             // создаем объект ClaimsIdentity
             ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,
