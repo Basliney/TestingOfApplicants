@@ -58,7 +58,7 @@ namespace TestingOfApplicants.Controllers
         // GET: EditingController/Edit/5
         public ActionResult Edit(int id)
         {
-            if (StaticData.Me.Role == 1)
+            if (StaticData.Me.Role != 0)
             {
                 TestHeader header = _context.TestHeaders.Where(x => x.Id == id).First();
                 StaticData.ChoosedHeader = id;
@@ -72,7 +72,7 @@ namespace TestingOfApplicants.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(string title, string description, string ask, string fakeAnswer1, string fakeAnswer2, string fakeAnswer3, string Answ)
         {
-            if (StaticData.Me.Role == 1)
+            if (StaticData.Me.Role != 0)
             {
                 try
                 {

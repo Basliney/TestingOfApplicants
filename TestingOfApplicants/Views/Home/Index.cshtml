@@ -1,6 +1,6 @@
 ﻿@using TestingOfApplicants.Models.Tests
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Тесты";
     List<TestHeader> list = Model;
     Random rnd = new Random();
     int color = rnd.Next(75, 180); 
@@ -26,7 +26,7 @@
                     <h3 class="testHeader">@list[j+i*countRow / 4].Title</h3>
                     <p class="testDescription">@list[j+i*countRow / 4].Description</p>
                         @{
-                            if (StaticData.Me.Role == 1)
+                            if (StaticData.Me.Role != 0)
                             {
                                 @Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = list[j+i*countRow / 4].Id})
                             }
