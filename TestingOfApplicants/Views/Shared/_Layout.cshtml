@@ -17,17 +17,20 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3" style="background: linear-gradient(to right, #2492df 0%,#003265 100%);">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TestingOfApplicants</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <a class="navbar-brand text-light" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="https://www.kubsu.ru/sites/all/themes/portal_kubsu/logo.png" />
+                    TestingOfApplicants
+                </a>
+                <button class="navbar-toggler text-light" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Тесты</a>
+                            <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Тесты</a>
                         </li>
                         @{
                             if (StaticData.Me != null)
@@ -35,12 +38,12 @@
                                 if (StaticData.Me.Role != 0)
                                 {
                                     <li class="nav-item">
-                                        <a class="nav-link text-dark" asp-area="" asp-controller="Editing" asp-action="CreateTest">Добавить тест</a>
+                                        <a class="nav-link text-light" asp-area="" asp-controller="Editing" asp-action="CreateTest">Добавить тест</a>
                                     </li>
                                     if (StaticData.Me.Role >= 2)
                                     {
                                         <li class="nav-item">
-                                            <a class="nav-link text-dark" asp-area="" asp-controller="Statistics" asp-action="AllStatistics">Статистика</a>
+                                            <a class="nav-link text-light" asp-area="" asp-controller="Statistics" asp-action="AllStatistics">Статистика</a>
                                         </li>
                                     }
                                 }
@@ -49,7 +52,13 @@
                     </ul>
                 </div>
                 <div>
-                    <a class="navbar-brand" href="@Url.ActionLink("UserInfo", "User", new {id=me.Id})">@me.mName</a>
+                    @{
+                        if (StaticData.Me != null)
+                        {
+                            <a class="navbar-brand text-light" href="@Url.ActionLink("UserInfo", "User", new {id=me.Id})">@me.mName
+                            <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" style="width:67px;"/></a>
+                        }
+                    }
                 </div>
             </div>
         </nav>
@@ -60,9 +69,20 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2022 - TestingOfApplicants - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="border-top footer align-items-center text-muted hidable-mobile">
+        <div class="block1">
+            <p>&copy; 2022 - Тестирование студентов и абитуриентов КубГУ<br /> 
+            Дипломная работа Баслиней Темира ФКТиПМ/ПИ/48гр.<br />
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Политика конфеденциальности</a></p>
+        
+        </div>
+        <div class="block3">
+            <img src="https://www.kubsu.ru/sites/all/themes/portal_kubsu/logo.png" />
+        </div>
+        <div class="block2">
+            <p>Тел.: +7 (918) 999-99-99<br /> 
+            E-mail: basliney@bk.ru<br />
+            Адрес: 350040, г. Краснодар, ул. Ставропольская, 149</p>
         </div>
     </footer>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

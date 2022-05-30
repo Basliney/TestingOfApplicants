@@ -1,0 +1,63 @@
+﻿@using TestingOfApplicants.Models.Tests
+@{
+    ViewData["Title"] = "Информация о вопросе";
+    TestHeader header = ViewBag.Header;
+    Question question = ViewBag.Question;
+}
+
+<style>
+    hr{
+        border: none;
+        background-color:gray;
+        color: black;
+        height:2px;
+    }
+    #EditBlock{
+        text-align:center;
+    }
+    .editText{
+        border-top:none;
+        border-left:none;
+        border-right:none;
+        max-height:50px;
+        width:450px;
+    }
+    #goal{
+        background-color:lightgreen;
+    }
+</style>
+
+<div calss="test-details" style="width: 100%;text-align: center;">
+    <p>[id - @header.Id] @header.Title</p>
+    <form asp-action="UpdateQuestion" asp-controller="Editing">
+        <h3>Вопрос:</h3>
+        <textarea name="ask" class="editText" id="ask" style="max-height:200px; height:max-content;" placeholder="Введите вопрос" oninput="checkFill()">@question.Ask</textarea>
+        <p>Неверные ответы:</p>
+        <p>1.<input type="text" id="fake1" name="fakeAnswer1" class="editText" placeholder="Введите неверный ответ"oninput="checkFill()" value="@question.FakeAnswer1"/></p><br />
+        <p>2.<input type="text" id="fake2" name="fakeAnswer2" class="editText" placeholder="Введите неверный ответ"oninput="checkFill()" value="@question.FakeAnswer2"/></p><br />
+        <p>3.<input type="text" id="fake3" name="fakeAnswer3" class="editText" placeholder="Введите неверный ответ"oninput="checkFill()" value="@question.FakeAnswer3"/></p><br />
+        <p>Верный ответ:</p>
+        <input type="text" name="Answ" class="editText" id="goal" placeholder="Введите ВЕРНЫЙ ответ"oninput="checkFill()" value="@question.Answer"/>
+        <br /><br />
+        <input type="submit" id="add-question-btn" disabled="disabled" value="Обновить вопрос"/>
+    </form>
+    <form asp-action="DeleteQuestion" asp-controller="Editing" style="margin-top:20px">
+        <input type="submit" id="delete-question-btn" value="Удалить вопрос" />
+    </form>
+</div>
+
+<script>
+    function checkFill(){
+        var ask = document.getElementById("ask").value;
+        var fake1 = document.getElementById("fake1").value;
+        var fake2 = document.getElementById("fake2").value;
+        var fake3 = document.getElementById("fake3").value;
+        var goal = document.getElementById("goal").value;
+
+        if (ask == "" || fake1==""||fake2==""||fake3==""||goal==""){
+            document.getElementById("add-question-btn").disabled = true;
+            return;
+        }
+        document.getElementById("add-question-btn").disabled = false;
+    }
+</script>

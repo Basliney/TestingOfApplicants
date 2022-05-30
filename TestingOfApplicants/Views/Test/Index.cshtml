@@ -5,6 +5,7 @@
     List<string> answers;
     string style = "visibility:hidden;";
     string numbersOfAnswers = "";
+    ViewData["Title"] = "Тест " + @StaticData.header.Title;
 }
 <div class="testCard">
     <h3 style="margin-bottom:50px;">@StaticData.header.Title</h3>
@@ -27,11 +28,11 @@
         {
             string name = "Question";//+i
 
-            <div name=@name class="questionCard" style=@style>
+            <div name=@name class="questionCard" id="target" style=@style>
                 @{
                     string ask = item.Ask;
                     int askHeight = ask.Split('\n').Length + 1;   // Вычисление высоты textarea
-                    <textarea class="Ask unselectable" readonly disabled rows="@askHeight" cols="100" style="margin-bottom:30px;">@ask</textarea>
+                    <textarea class="Ask unselectable" name="textAreaCols" style="color:white; margin-bottom:30px;" readonly disabled rows="@askHeight" cols="100" >@ask</textarea>
                     GetQuestions(item);
                     <div class="answers">
                         <input type="button" class="answer" onClick="changeQuestion(0);" value="@answers[0]">
@@ -56,6 +57,14 @@
         <p id="TestP"></p>
     }
 </div>
+
+<script>
+        var cols = document.getElementsByName("textAreaCols");
+        var target = document.getElementById("target").clientWidth;
+        for(i=0;i<cols.length;i++){
+            cols[i].cols = target/10;
+        }
+</script>
 
 @{
     void GetQuestions(Question question)

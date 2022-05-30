@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TestingOfApplicants.Models;
 using TestingOfApplicants.Models.Tests;
 
@@ -15,9 +17,19 @@ namespace TestingOfApplicants.Controllers
             _context = context;
         }
 
-        public IActionResult UserInfo(int id)
+        public async Task <IActionResult> UserInfo(int id)
         {
+            if (StaticData.Me == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
             if (id != StaticData.Me.Id && StaticData.Me.Role < 2)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (await _context.Users.FirstOrDefaultAsync(x=>x.Id == id) == null)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -32,6 +44,8 @@ namespace TestingOfApplicants.Controllers
 
             ViewBag.Headers = headers;
             ViewBag.User = _context.Users.FirstOrDefault(x => x.Id == id);
+            ViewBag.CompletedTests = _context.CompletedTestsDto.Where(x=>x.UserId==id).ToList();
+            ViewBag.Subjects = _context.subjects.ToList();
 
             return View();
         }

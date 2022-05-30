@@ -19,22 +19,99 @@
         background-color:lightgreen;
     }
 </style>
+
+@{
+    ViewData["Title"] = "Добавление вопросов";
+}
+
+
 <div id="EditBlock">
     <form asp-action="Edit" asp-controller="Editing" asp-anti-forgery="true">
-    <h3>Название:</h3>
-    <input type="text" name="title" value="@Model.Title" class="editText"/>
-    <h3>Описание:</h3>
-    <textarea name="description" class="editText">@Model.Description</textarea>
-    <br /><hr><br />
-    <h3>Вопрос:</h3>
-    <textarea name="ask"class="editText" style="max-height:200px; height:max-content;"></textarea>
-    <p>Неверные ответы:</p>
-    <p>1.<input type="text" name="fakeAnswer1" class="editText"/></p><br />
-    <p>2.<input type="text" name="fakeAnswer2" class="editText"/></p><br />
-    <p>3.<input type="text" name="fakeAnswer3" class="editText"/></p><br />
-    <p>Верный ответ:</p>
-    <input type="text" name="Answ" class="editText" id="goal"/>
-    <br /><br />
-    <input type="submit" value="Добавить вопрос"/>
+        <label>Тема:</label><br />
+        <input type="radio" id="choice1" name="theme" value="1" @checking(1) onclick="onChangeCheck(1)"/>
+        <label for="choice1">Искусственный Интеллект</label><br />
+        <input type="radio" id="choice2" name="theme" value="2" @checking(2) onclick="onChangeCheck(2)"/>
+        <label for="choice2">Математическое моделирование</label><br />
+        <input type="radio" id="choice3" name="theme" value="1002" @checking(1002) onclick="onChangeCheck(1002)"/>
+        <label for="choice3">WEB</label><br />
+        <input type="radio" id="choice4" name="theme" value="3" @checking(3) onclick="onChangeCheck(3)"/>
+        <label for="choice4">ООП</label><br />
+        <h3>Название:</h3>
+        <input type="text" name="title" id="testTitle" value="@Model.Title" oninput="onChangeInformation()" class="editText"/>
+        <h3>Описание:</h3>
+        <textarea name="description" id="testDiscription" oninput="onChangeInformation()" class="editText">@Model.Description</textarea>
+        <br />
+        <input type="submit" id="change-btn" value="Изменить" disabled="disabled"/>
+        <hr><br />
+        <a href="@Url.ActionLink("TestDetails","Statistics",new{id=@Model.Id})">Просмотреть вопросы</a>
+        <h3>Вопрос:</h3>
+        <textarea name="ask" class="editText" id="ask" style="max-height:200px; height:max-content;" placeholder="Введите вопрос" oninput="checkFill()"></textarea>
+        <p>Неверные ответы:</p>
+        <p>1.<input type="text" id="fake1" name="fakeAnswer1" class="editText" placeholder="Введите неверный ответ"oninput="checkFill()"/></p><br />
+        <p>2.<input type="text" id="fake2" name="fakeAnswer2" class="editText" placeholder="Введите неверный ответ"oninput="checkFill()"/></p><br />
+        <p>3.<input type="text" id="fake3" name="fakeAnswer3" class="editText" placeholder="Введите неверный ответ"oninput="checkFill()"/></p><br />
+        <p>Верный ответ:</p>
+        <input type="text" name="Answ" class="editText" id="goal" placeholder="Введите ВЕРНЫЙ ответ"oninput="checkFill()"/>
+        <br /><br />
+        <input type="submit" id="add-question-btn" disabled="disabled" value="Добавить вопрос"/>
     </form>
 </div>
+
+<script>
+
+    function checkFill(){
+        var ask = document.getElementById("ask").value;
+        var fake1 = document.getElementById("fake1").value;
+        var fake2 = document.getElementById("fake2").value;
+        var fake3 = document.getElementById("fake3").value;
+        var goal = document.getElementById("goal").value;
+
+        if (ask == "" || fake1==""||fake2==""||fake3==""||goal==""){
+            document.getElementById("add-question-btn").disabled = true;
+            return;
+        }
+        document.getElementById("add-question-btn").disabled = false;
+    }
+
+    let theme = false;
+    let inform = false;
+    let textTitle = document.getElementById("testTitle").value;
+    let textDesc = document.getElementById("testDiscription").value;
+
+    function onChangeInformation(){
+        if (textTitle == document.getElementById("testTitle").value && textDesc == document.getElementById("testDiscription").value){
+            inform = false;
+        }
+        else{
+            inform = true;
+        
+        }
+        checkBool();
+    }
+
+    function onChangeCheck(id){
+        if (@ViewBag.selectedSubject == id){
+            theme = false;
+        }
+        else{
+            theme = true;
+        }
+        checkBool();
+    }
+
+    function checkBool(){
+        if (theme || inform){
+            document.getElementById("change-btn").disabled = false;
+        }
+        else{
+            document.getElementById("change-btn").disabled = true;
+        }
+    }
+</script>
+
+@{
+    string checking(int id)
+    {
+        return (ViewBag.selectedSubject == id ? "checked=\"checked\"" : "");
+    }
+}

@@ -1,0 +1,43 @@
+﻿@{
+
+}
+
+<div class="body-authorize">
+    <form method="post" class = "authorize-form">
+        <p class = "text-form head-form"><a asp-action="SignIn" asp-controller="Authorization">Регистрация</a>  |  <a asp-action="Login" asp-controller="Authorization">Войти</a></p>
+        <p class = "text-form">Введите ФИО полностью</p>
+        <input type="text" id="authorize_name" name="name" class="name_authorize" placeholder="Иванов Иван Иванович" oninput="onChangePasswordSignIn()"/><br />
+        <p class = "text-form">Введите почту</p>
+        <input type="email" id="authorize_mail" name="mail" placeholder="example@mail.ru" class="name_authorize" oninput="onChangePasswordSignIn()"/><br />
+        <p class = "text-form">Введите пароль</p>
+        <input type="password" name="authorize_password" id="pas1" class="name_authorize" oninput="onChangePasswordSignIn()"/><br />
+        <p class = "text-form">Повторите пароль</p>
+		<input type="password" name="authorize_password_again" id="pas2" class="name_authorize" oninput="onChangePasswordSignIn()"><br />
+		<a href="#" class="password-control" onclick="return show_hide_password(this);">Показать пароль</a><br />
+        <input type="submit" id="sign_btn" style="margin-top:10px" value="Войти" disabled="disabled"/>
+        <p style="margin-top:20px; color:white;">Если Вы являетесь студентом Кубанского Государственного Университета, то Вы можете зайти на сайт тестирования через <a href="https://www.kubsu.ru">сайт университета</a></p>
+    </form>
+</div>
+
+<style>
+	.password-control{
+		color:white;
+		text-decoration:none;
+	}
+</style>
+
+<script>
+    function show_hide_password(target){
+	    var input1 = document.getElementById('pas1');
+	    if (input1.getAttribute('type') == 'password') {
+		    target.classList.add('view');
+			target.textContent = "Скрыть пароль";
+		    input1.setAttribute('type', 'text');
+	    } else {
+		    target.classList.remove('view');
+			target.textContent = "Показать пароль";
+		    input1.setAttribute('type', 'password');
+	    }
+	    return false;
+    }
+</script>

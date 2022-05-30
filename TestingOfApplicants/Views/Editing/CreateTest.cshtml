@@ -1,5 +1,18 @@
-﻿<div class="AddTest">
+﻿@{
+    ViewData["Title"] = "Создание теста";
+}
+
+<div class="AddTest">
     <form method="post">
+        <label>Тема:</label><br />
+        <input type="radio" id="choice1" name="theme" value="1" checked="checked"/>
+        <label for="choice1">Искусственный Интеллект</label><br />
+        <input type="radio" id="choice2" name="theme" value="2"/>
+        <label for="choice2">Математическое моделирование</label><br />
+        <input type="radio" id="choice3" name="theme" value="1002" />
+        <label for="choice3">WEB</label><br />
+        <input type="radio" id="choice3" name="theme" value="3"/>
+        <label for="choice3">ООП</label><br />
         <label>Название теста:</label><br />
         <input type="text" name="title" /><br /><br />
         <label>Краткое описание теста:</label><br />

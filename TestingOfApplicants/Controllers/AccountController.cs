@@ -64,10 +64,27 @@ namespace TestingOfApplicants.Controllers
                 else
                 {
                     // Если ФИО нет в ссылке, то переходим на сайт КубГУ
-                    return Redirect("https://www.kubsu.ru/");
+                    return RedirectToAction("Login", "Authorization");
                 }
             }
             return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddMail([FromForm] string mail)
+        {
+            if (StaticData.Me == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if (await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(mail)) == null){
+                StaticData.Me.Email = mail;
+                _context.Users.Update(StaticData.Me);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("UserInfo", "User", new { id = StaticData.Me.Id });
         }
 
         private async Task Authenticate(User user)

@@ -5,6 +5,8 @@
     Random rnd = new Random();
     int color = rnd.Next(75, 180); 
     int countRow = list.Count;
+    int countRowNew = countRow / 4;
+    if (list.Count % 4 != 0) { countRowNew++; }
     bool flag = false;
 }
 
@@ -12,41 +14,68 @@
     <h1 class="display-4">Добро пожаловать!</h1>
     <p>Мы рады видеть вас, @StaticData.Me.mName.Split()[1], у нас на сайте тестирования. Ниже вы можете найти все доступные тесты для прохождения</p>
     
-    @while (countRow % 4 != 0)
-    {
-        countRow++;
-    }
     <div class="row">
-    @for(int i = 0; i < 4; i++)
-    {
-        <div class="column">
-            @for(int j = 0; j < countRow / 4;j++){
-                @if (j + i * countRow / 4 >= list.Count) break;
-                <div class="questionsTile" style="background:@GetColor(j+i*countRow / 4); height: 250px; @GetAnimation()">
-                    <h3 class="testHeader">@list[j+i*countRow / 4].Title</h3>
-                    <p class="testDescription">@list[j+i*countRow / 4].Description</p>
-                        @{
-                            if (StaticData.Me.Role != 0)
-                            {
-                                @Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = list[j+i*countRow / 4].Id})
+    @{
+        for(int i = 0; i < countRowNew; i++)
+        {
+            <div class = "main-row">
+                @{
+                    for(int j = i * 4; j < i * 4 + 4; j++)
+                    {
+                        @if (j >= list.Count) break;
+                        <div class="questionsTile" style="background:@GetColor(j); @GetAnimation()">
+                            @{
+                                string subject;
+                                @switch(list[j].Subjectid)
+                                {
+                                    case 1:
+                                        subject = "ИИ";
+                                        break;
+                                    
+                                    case 2:
+                                        subject = "Мат. Моделирование";
+                                        break;
+                                    
+                                    case 3:
+                                        subject = "ООП";
+                                        break;
+                                    case 1002:
+                                        subject = "WEB";
+                                        break;
+                                    default:
+                                        subject = "";
+                                        break;
+                                }
+                                //var subject =  == null ? "" : list[j+i*countRow / 4].Subjectid.ToString();
+
                             }
-                        }
-                        <br/>
-                        <div class="buttons">
-                            @if(flag)
-                            {
-                                flag = false;
+                            <p class="testHeader" style="font-size: 10px; margin-bottom:0px">@subject</p>
+                            <h3 class="testHeader">@list[j].Title</h3>
+                            <p class="testDescription">@list[j].Description</p>
+                            @{
+                                if (StaticData.Me.Role != 0)
+                                {
+                                    @Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = list[j].Id})
+                                }
                             }
-                            else
-                            {
-                                @Html.RouteLink("Начать прохождение", new {controller = "Test", action = "Index", id = list[j+i*countRow / 4].Id},new { @class = "startButton"})
-                            }
-                        </div>
-                </div>@*questionTile*@
-            }
-        </div>@*column*@
+                            <br/>
+                            <div class="buttons">
+                                @if(flag)
+                                {
+                                    flag = false;
+                                }
+                                else
+                                {
+                                    @Html.RouteLink("Начать прохождение", new {controller = "Test", action = "Index", id = list[j].Id},new { @class = "startButton"})
+                                }
+                            </div>
+                        </div>@*questionTile*@
+                    }
+                }
+            </div>
+        }
     }
-    </div> @*row*@
+    </div>
 </div>
 
 @{
@@ -66,7 +95,7 @@
                 return $"rgb({col},{128},{col})";
             }
         }
-        color = rnd.Next(75, 180); 
-        return $"rgb({color},{color},{color})";
+        color = rnd.Next(130, 200); 
+        return $"rgb({MathF.Round((color-50)/2)},{color-50},{color})";
     }
 }

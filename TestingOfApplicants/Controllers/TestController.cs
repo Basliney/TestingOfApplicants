@@ -31,8 +31,19 @@ namespace TestingOfApplicants.Controllers
         /// </summary>
         /// <param name="id">Номер теста</param>
         /// <returns>Вид</returns>
+        [HttpGet]
         public async Task<ActionResult> Index(int id)
         {
+            if (StaticData.Me == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if(await _context.TestHeaders.FirstOrDefaultAsync(x=>x.Id == id) == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             // Если Пользователь еще не прошел этот тест
             if (await _context.CompletedTestsDto.FirstOrDefaultAsync(x => (x.TestId == id && x.UserId == StaticData.Me.Id)) == null)
             {
@@ -62,36 +73,35 @@ namespace TestingOfApplicants.Controllers
         {
             try
             {
-                if (ModelState.IsValid)
+                bool canWrite = !ModelState.IsValid;
+
+                // Если процент правильных ответов - пустая строка или null, то
+                canWrite = !string.IsNullOrEmpty(countToDB);
+
+                int count = Int32.Parse(countToDB);
+
+                // Если процент минимум 80 и предыдущие этапы не запретили запись
+                if (count >= 80 && canWrite == true)
                 {
-                    // Если процент правильных ответов не пустая строка и не null, то
-                    if (!countToDB.Equals("") && countToDB != null)
+                    //Создаем объект завершенного теста
+                    CompletedTestDto completedTestDto = new CompletedTestDto()
                     {
-                        // Парсим из текста число
-                        int count = Int32.Parse(countToDB);
+                        TestId = StaticData.ChoosedHeader,
+                        UserId = StaticData.Me.Id,
+                        CountByPersent = count
+                    };
 
-                        // Если процент минимум 80
-                        if (count >= 80)
-                        {
-                            //Создаем объект завершенного теста
-                            CompletedTestDto completedTestDto = new CompletedTestDto()
-                            {
-                                TestId = StaticData.ChoosedHeader,
-                                UserId = StaticData.Me.Id,
-                                CountByPersent = count
-                            };
-
-                            // Добавляем в БД выполненный тест
-                            _context.CompletedTestsDto.Add(completedTestDto);
-                            await _context.SaveChangesAsync();  // Сохраняем изменения
-                        }
-                    }
+                    // Добавляем в БД выполненный тест
+                    _context.CompletedTestsDto.Add(completedTestDto);
+                    await _context.SaveChangesAsync();  // Сохраняем изменения
                 }
-                return RedirectToAction("Index", "Home");   // Возвращаемся на главную
+
+                StaticData.ChoosedHeader = -1;
+                return RedirectToAction("Index", "Home");
             }
-            catch (Exception ex)
+            catch
             {
-                return RedirectToAction("Index", "Home");   // Возвращаемся на главную
+                return RedirectToAction("Index", "Test", new { id = StaticData.ChoosedHeader });   // Возвращаемся на страницу старта теста
             }
         }
     }

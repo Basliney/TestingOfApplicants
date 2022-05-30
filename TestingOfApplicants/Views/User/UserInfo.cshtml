@@ -3,16 +3,94 @@
 @{
     List<TestHeader> headers = ViewBag.Headers;
     User user = ViewBag.User;
+    List<CompletedTestDto> completedTests = ViewBag.CompletedTests;
+    completedTests = completedTests.Where(x => x.UserId == user.Id).ToList();
+    ViewData["Title"] = "Статистика "+user.mName;
+    List<SubjectDto> subjects = ViewBag.Subjects;
+    subjects[0].name = "ИИ"; subjects[1].name = "ММ";
 }
 
-<div class="text-center">
-    <p>@user.mName</p>
+<div class="statistics-body">
+    <div class="fio-levels">
+        <div class="fio-statistics">
+            <p class="p-statistics">ФИО: @user.mName</p>
+            @{
+                if(!string.IsNullOrEmpty(user.Email))
+                {
+                    if (user.Id == StaticData.Me.Id)
+                    {
+                        <p style="color:rgb(60, 205, 90);">Почта привязана!</p>
+                    }
+                    <p>@user.Email</p>
+                }
+                else
+                {
+                    if (user.Id == StaticData.Me.Id)
+                    {
+                        <p style="color:rgb(156, 155, 53);">! Для устранения возможных проблем при входе, пожалуйста, привяжите почту !</p>
+                        <form asp-action="AddMail" asp-controller="Account">
+                            <input type="email" style="border-radius:5px;" name="mail" id="mail" placeholder="example@mail.ru" onchange="checkMail()"/>
+                            <input type="submit"  id="sub-btn" value="Привязать" disabled="disabled"/>
+                        </form>
+                    }
+                }
+            }
+        </div>
+        <div class="subject-levels">
+            @{
+                foreach(var subject in subjects)
+                {
+                    <div class="subject">
+                        <div class = "background-white">
+                            <p class="p-statistics">@subject.name</p>
+                            @{
+                                var level = 1;
+                                foreach(var item in completedTests)
+                                {
+                                    if (headers.FirstOrDefault(x => x.Id == item.TestId).Subjectid == subject.id)
+                                    {
+                                        level++;
+                                    }
+                                }
+                            }
+                            <p class="p-statistics">Уровень @level</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
     @{
-        foreach(var header in headers)
+        if (StaticData.Me.Id == user.Id)
         {
-            <h3>@header.Title</h3>
+            <div class="logout">
+                <a asp-area="" asp-controller="Authorization" asp-action="SignOut">Выход</a>
+            </div>
         }
     }
+    <div class="completed-tests">
+        @{
+            subjects[0].name = "Искусственный Интеллект"; subjects[1].name = "Математическое Моделирование";
+            <p>Пройденные тесты:</p>
+            <table border=1 class="tableStatistics">
+            <tr><th class="hidable-mobile">ID <br />теста</th><th>Название</th><th class="hidable-mobile">Предметная область</th><th>Процент<br />правильных ответов</th></tr>
+            @foreach(var header in headers)
+            {
+                <tr><td class="hidable-mobile">@header.Id</td><td>@header.Title</td><td class="hidable-mobile">@subjects.FirstOrDefault(x=>x.id==header.Subjectid).name</td><td>@completedTests.FirstOrDefault(x=>x.TestId==header.Id).CountByPersent%</td></tr>
+            }
+            </table>
+        }
+    </div>
 </div>
 
+<style>
+    #sub-btn{
+        border-radius:5px;
+        color:white; 
+        background-image:linear-gradient(to right, #646464 0%,#383838 100%);
+    }
+</style>
 
+<script>
+    
+</script>

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,35 +18,99 @@ namespace TestingOfApplicants.Controllers
             this._context = context;
         }
 
-        public async Task<ActionResult> AllStatistics()
+        public ActionResult AllStatistics()
         {
-            if (StaticData.Me.Role == 2)
+            if (StaticData.Me == null)
             {
-                List<User> userList = _context.Users.ToList();
-                List<CompletedTestDto> completedTests = _context.CompletedTestsDto.ToList();
-                List<TestHeader> headers = _context.TestHeaders.ToList();
-
-                AllStatistics statistics = new AllStatistics(userList, completedTests, headers);
-
-                return View(statistics);
+                return RedirectToAction("Login", "Authorization");
             }
-            return RedirectToAction("Index", "Home");
+
+            if (StaticData.Me.Role != 2)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            List<User> userList = _context.Users.ToList();
+            List<CompletedTestDto> completedTests = _context.CompletedTestsDto.ToList();
+            List<TestHeader> headers = _context.TestHeaders.ToList();
+            List<SubjectDto> subjects = _context.subjects.ToList();
+
+            Dictionary<TestHeader, int> dict = new Dictionary<TestHeader, int>();
+
+            foreach (var item in headers)
+            {
+                dict.Add(item, completedTests.Where(x => x.TestId == item.Id).Count());
+            }
+
+            var sortedDict = from d in dict
+                             orderby d.Value descending
+                             select d;
+
+            AllStatistics statistics = new AllStatistics(userList, completedTests, headers);
+            ViewBag.Subjects = subjects;
+            ViewBag.Questions = _context.Questions.ToList();
+            ViewBag.Headers = sortedDict;
+
+            return View(statistics);
         }
 
-        public async Task<ActionResult> DisplaySearchResults(string FIOfinder)
+        public IActionResult DisplaySearchResults(string FIOfinder)
         {
-            if (StaticData.Me.Role == 2 && FIOfinder != null && !FIOfinder.Equals(""))
+            if (StaticData.Me == null)
             {
-                List<User> userList = _context.Users.Where(x=>x.mName.ToLower().Contains(FIOfinder.ToLower())).ToList();
-
-                return View(userList);
+                return RedirectToAction("Login", "Authorization");
             }
-            return RedirectToAction("AllStatistics", "Statistics");
+
+            if (StaticData.Me.Role < 2 || string.IsNullOrEmpty(FIOfinder))
+            {
+                return RedirectToAction("AllStatistics", "Statistics");
+            }
+
+            List<User> userList = _context.Users.Where(x => x.mName.ToLower().Contains(FIOfinder.ToLower())).ToList();
+
+            return View(userList);
+
         }
 
-        public ActionResult Details(int id)
+        [HttpGet]
+        public async Task<IActionResult> TestDetails(int id)
         {
-            return View();
+            if (StaticData.Me == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if (StaticData.Me.Role < 1)
+            {
+                return RedirectToAction("AllStatistics", "Statistics");
+            }
+
+            try
+            {
+                List<User> users = new List<User>();
+
+                List<CompletedTestDto> tests = _context.CompletedTestsDto.Where(x => x.TestId == id).ToList();
+
+                foreach (var item in tests)
+                {
+                    users.Add(await _context.Users.FirstOrDefaultAsync(x => x.Id == item.UserId));
+                }
+
+                var test = await _context.TestHeaders.FirstOrDefaultAsync(x => x.Id == id);
+                var subject = await _context.subjects.FirstOrDefaultAsync(x => x.id == test.Subjectid);
+                List<Question> questions = _context.Questions.Where(x => x.HeaderId == id).ToList();
+
+                ViewBag.Questions = questions;
+                ViewBag.Test = test;
+                ViewBag.Users = users;
+                ViewBag.CompletedTests = tests;
+                ViewBag.Subject = subject;
+                return View();
+            }
+            catch
+            {
+                return RedirectToAction("AllStatistics", "Statistics");
+            }
         }
     }
 }

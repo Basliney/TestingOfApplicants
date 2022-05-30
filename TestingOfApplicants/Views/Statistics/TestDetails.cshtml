@@ -1,0 +1,61 @@
+﻿@using TestingOfApplicants.Models
+@using TestingOfApplicants.Models.ProgramStaticFiles.Map
+@using TestingOfApplicants.Models.Tests
+
+@{
+    List<User> users = ViewBag.Users;
+    TestHeader test = ViewBag.Test;
+    List<CompletedTestDto> completedTests = ViewBag.CompletedTests;
+    SubjectDto subject = ViewBag.Subject;
+    List<Question> questions = ViewBag.Questions;
+}
+
+<div class="test-details">
+    <p>@test.Title - @subject.name</p>
+    <p>@test.Description</p>
+    <p class="test-details-link">@Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = test.Id})</p>
+    <p class="p-questions">Вопросы:</p>
+    @{
+        if (questions.Count == 0)
+        {
+            <p>Вопросов пока нет. <a href="@Url.ActionLink("Edit","Editing",new{id=test.Id})">Добавить</a></p>
+        }
+    }
+    <div class="qestions-row">
+        @{
+            foreach(var item in questions)
+            {
+                <a href="@Url.ActionLink("QuestionDetails","Editing",new{id=item.Id})">
+                    <div class="row-block" style="background:@GetColor();">
+                        <p class="row-block-item">
+                            @item.Ask.Substring(0,Math.Min(item.Ask.Length,40))...
+                        </p>
+                    </div>
+                </a>
+            }
+        }
+    </div>
+    @{
+        var midlePersent = completedTests.Sum(x => x.CountByPersent)/Math.Max(completedTests.Count,1);
+    }
+    <p class="p-questions">Средний процент прохождения: @midlePersent</p>
+    <table border=1 class="tableStatistics">
+            <tr><th>ID <br /> пользователя</th><th>ФИО</th><th>Процент прохождения</th></tr>
+            @{
+                foreach (var user in users)
+                {
+                    <tr><td>@user.Id</td><td><a href="@Url.ActionLink("UserInfo", "User", new {id=user.Id})">@user.mName</a></td><td>@completedTests.FirstOrDefault(x=>x.UserId == user.Id).CountByPersent%</td></tr>
+                }
+            }
+    </table>
+    
+</div>
+
+@{
+    string GetColor()
+    {
+        Random rnd = new Random();
+        var color = rnd.Next(130, 200); 
+        return $"rgb({MathF.Round((color-50)/2)},{color-50},{color})";
+    }
+}

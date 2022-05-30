@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 using TestingOfApplicants.Models.Tests;
 
 namespace TestingOfApplicants.Models
@@ -12,6 +14,8 @@ namespace TestingOfApplicants.Models
         public DbSet<Question> Questions { get; set; }
 
         public DbSet<CompletedTestDto> CompletedTestsDto { get; set; }
+
+        public DbSet<SubjectDto> subjects { get; set; }
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {

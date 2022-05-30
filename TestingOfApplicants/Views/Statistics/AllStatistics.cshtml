@@ -6,57 +6,147 @@
     List<User> users = Model.users;
     List<TestHeader> headers = Model.headers;
     List<CompletedTestDto> completedTests = Model.completedTests;
+    List<SubjectDto> subjects = ViewBag.Subjects;
+    List<Question> questions = ViewBag.Questions;
+    IOrderedEnumerable<KeyValuePair<TestHeader, int>> dict = ViewBag.Headers;
 
-    bool find = false;
+    string[] recomendationFirst =
+            {
+                "Увеличить",
+                "Уменьшить"
+            };
+
+    string[] recomendationSecond =
+            {
+                " сложность прохождения ",
+                " количество вопросов ",
+                " заинтересованность предметной областью ",
+            };
+
+    int normalCount = 7;
 }
 
-<div class="text-center">
+<div class="statistics">
     @{
         <div id="finder">
+            <p>Поиск пользователя</p>
             <input type="text" id="Keyword" placeholder="Иванов Иван Иванович"/>
             <button id="search" >Поиск</button>
         </div>
-        if (find == false)
-        {
-            <table border=1>
-                <tr><th>ID <br /> пользователя</th><th>ФИО</th><th>Кол-во пройденных тестов</th><th>Процент от всех тестов</th></tr>
-                @{
-                    int countAllTests = headers.Count;
-                    foreach (var user in users)
-                    {
-                        int countCompleted = completedTests.Where(x => x.UserId == user.Id).Count();
-                        <tr><td>@user.Id</td><td><a href="@Url.ActionLink("UserInfo", "User", new {id=user.Id})">@user.mName</a></td><td>@countCompleted</td><td>@(countCompleted*100/countAllTests)</td></tr>
-                    }
+        <p>Активность пользователей</p>
+        <table border=1 class="tableStatistics">
+            <tr><th>ID <br /> пользователя</th><th>ФИО</th><th>Кол-во пройденных тестов</th><th class="hidable-mobile">Процент от всех тестов</th></tr>
+            @{
+                int countAllTests = headers.Count;
+                foreach (var user in users)
+                {
+                    int countCompleted = completedTests.Where(x => x.UserId == user.Id).Count();
+                    <tr><td>@user.Id</td><td><a href="@Url.ActionLink("UserInfo", "User", new {id=user.Id})">@user.mName</a></td><td>@countCompleted</td><td class="hidable-mobile">@(countCompleted*100/countAllTests)</td></tr>
                 }
-            </table>
-            Map map = new Map();
-            foreach (var item in completedTests)
-            {
-                map.Add(item.TestId);
             }
-            <table border=1>
-                @{
-                    <tr><th>Название теста</th><th>Кол-во прохождений</th></tr>
-                    for (int i = 0; i < map.Count; i++)
+        </table>
+
+        <p>Популярность тестов</p>
+        <table border=1 class="tableStatistics">
+            @{
+                <tr><th>ID<br />теста</th><th>Название теста</th><th class="hidable-mobile">Предметная<br />область</th><th>Кол-во прохождений</th></tr>
+                
+                foreach(var header in dict)
+                {
+                    string subject = "";
+                    switch (header.Key.Subjectid)
                     {
-                        <tr><td>@headers.FirstOrDefault(x=>x.Id == map.Get(i).Key).Title</td><td>@map.Get(i).Value</td></tr>
+                        case 1:
+                            subject = "ИИ";
+                            break;
+
+                        case 2:
+                            subject = "Мат. Моделирование";
+                            break;
+
+                        case 3:
+                            subject = "ООП";
+                            break;
+
+                        case 1002:
+                            subject = "WEB";
+                            break;
+
+                        default:
+                            subject = "";
+                            break;
                     }
+                    <tr><td>@header.Key.Id</td><td><a href="@Url.ActionLink("TestDetails","Statistics", new{id=@header.Key.Id})">@header.Key.Title</a></td><td class="hidable-mobile">@subject</td><td>@header.Value</td></tr>
                 }
-            </table>
-            <h3>Самый популярный тест - "@headers.FirstOrDefault(x=>x.Id == map.Popular(true).Key).Title"</h3>
-            <h3>Наименее популярный тест - "@headers.FirstOrDefault(x=>x.Id == map.Popular(false).Key).Title"</h3>
+            }
+        </table>
+        <p>
+            Блок рекомендаций:
+        </p>
+        var midlePercent = completedTests.Where(x=>x.TestId==dict.First().Key.Id);
+        <p style="margin-top:10px;">Самый популярный тест - "@dict.First().Key.Title" 
+            из предметной области "@subjects.FirstOrDefault(x=>x.id == dict.First().Key.Subjectid).name" 
+            с количеством прохождений: @dict.First().Value<br />
+            средний процент прохождения: @(midlePercent.Sum(x=>x.CountByPersent)/Math.Max(midlePercent.Count(),1))%
+        </p>
+        midlePercent = completedTests.Where(x=>x.TestId==dict.Last().Key.Id);
+        <p style="margin-top:10px;">Наименее популярный тест - "@dict.Last().Key.Title"
+            из предметной области "@subjects.FirstOrDefault(x=>x.id==dict.Last().Key.Subjectid).name"
+            с количеством прохождений: @dict.Last().Value<br />
+            средний процент прохождения: @(midlePercent.Sum(x=>x.CountByPersent)/Math.Max(midlePercent.Count(), 1))%
+        </p>
+
+        <div style="height:500px; margin-top:50px; overflow:auto">
+        @{
+        foreach(var header in headers)
+        {
+            var recomendation = "";
+            var countQuestions = questions.Where(x => x.HeaderId == header.Id).Count();
+            if (countQuestions > normalCount)
+            {
+                recomendation += recomendationFirst[1] + recomendationSecond[1];
+                recomendation += $"(На данный момент в тесте {@countQuestions} вопросов); ";
+            }
+            if (countQuestions < normalCount)
+            {
+                recomendation += recomendationFirst[0] + recomendationSecond[1];
+                recomendation += $"(На данный момент в тесте {@countQuestions} вопросов); ";
+            }
+
+            if (countQuestions > 0)
+            {
+                var completed = completedTests.Where(x => x.TestId == header.Id);
+                var percentComplete = completed.Sum(x => x.CountByPersent) / MathF.Max(completed.Count(), 1);
+                if (percentComplete < 90)
+                {
+                    recomendation += recomendationFirst[1] + recomendationSecond[0];
+                    recomendation += $"(На данный момент средний процент прохождения {@percentComplete}%); ";
+                }
+                if (percentComplete > 96)
+                {
+                    recomendation += recomendationFirst[0] + recomendationSecond[0];
+                    recomendation += $"(На данный момент средний процент прохождения {@percentComplete}%); ";
+                }
+            }
+
+            if (!recomendation.Equals(""))
+            {
+                <p style="margin-top:10px;">Для продвижения теста "[@header.Id]@header.Title" желательно: @recomendation</p>
+            }
         }
+        }
+        </div>
     }
 </div>
 
 <style>
-th, td{
-    padding: 10px;
-}
+    th, td{
+        padding: 10px;
+    }
 
-table{
-    margin-bottom:10px;
-}
+    table{
+        margin-bottom:10px;
+    }
 </style>
 
 <script>

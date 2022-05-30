@@ -11,5 +11,7 @@ namespace TestingOfApplicants.Models
         public static List<CompletedTestDto> completedTestsDto { get; set; }
 
         public static TestHeader header { get; set; }
+
+        public static Question QuestionOnEdit { get; set; }
     }
 }

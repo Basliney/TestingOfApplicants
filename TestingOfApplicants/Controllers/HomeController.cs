@@ -28,18 +28,19 @@ namespace TestingOfApplicants.Controllers
             {
                 try
                 {
-                    string myName = User
-                            .FindFirst(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value.ToString();
+                    var user = User.FindFirst(x => x.Type == ClaimsIdentity.DefaultNameClaimType);
+
+                    if (user == null) { return RedirectToAction("Login", "Authorization"); }
+
+                    string myName = user.Value.ToString();
 
                     StaticData.Me = await _context.Users
                         .FirstOrDefaultAsync(x => x.mName.Equals(myName));
-
-                    RedirectToAction("Login", "Account");
                 }
                 catch(NullReferenceException e)
                 {
                     _logger.LogError(e.StackTrace);
-                    return Redirect("https://Kubsu.ru");
+                    return RedirectToAction("Login", "Authorization");
                 }
             }
             List<TestHeader> testHeaders = await _context.TestHeaders.ToListAsync();
