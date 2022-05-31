@@ -19,7 +19,7 @@ namespace TestingOfApplicants
 
         public void ConfigureServices(IServiceCollection services)
         {
-            string connection = "Server=(localdb)\\mssqllocaldb;Database=TetsingOfApplicantsDB;Trusted_Connection=True;";
+            string connection = Configuration.GetConnectionString("EFDbContext");//"Server=(localdb)\\mssqllocaldb;Database=TetsingOfApplicantsDB;Trusted_Connection=True;";
             services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(connection));
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

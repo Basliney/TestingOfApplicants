@@ -19,8 +19,8 @@ namespace TestingOfApplicants.Models
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
-            Database.Migrate();
-            //Database.EnsureCreated();
+            //Database.Migrate();
+            Database.EnsureCreated();
         }
     }
 }
