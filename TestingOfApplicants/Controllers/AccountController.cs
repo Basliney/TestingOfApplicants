@@ -26,48 +26,60 @@ namespace TestingOfApplicants.Controllers
         /// </summary>
         /// <param name="name">ФИО пользователя (с сайта КубГУ)</param>
         /// <returns></returns>
-        public async Task<IActionResult> Login(string name)
+        public async Task<IActionResult> Login(string name, string password)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                /* 
-                 * На сайт КубГУ установлено расширение, которое не позволяет нажимать на ссылку 
-                 * тестирования, если пользователь не аутентифицирован.
-                 * Но если набрать в поисковой строке localhost:44390/Account/Login то ссылка направит на 
-                 * аутентификацию в системе тестирования. Поэтому следует проверять параметр name на пустоту
-                */
-                if (name != null && name.Trim().Split().Length >= 2)
+                return Redirect("https://kubsu.ru");
+            }
+            /* 
+             * На сайт КубГУ установлено расширение, которое не позволяет нажимать на ссылку 
+             * тестирования, если пользователь не аутентифицирован.
+             * Но если набрать в поисковой строке localhost:44390/Account/Login то ссылка направит на 
+             * аутентификацию в системе тестирования. Поэтому следует проверять параметр name на пустоту
+            */
+            if (name == null || name.Trim().Split().Length < 2 || string.IsNullOrEmpty(password))
+            {
+                return Redirect("https://kubsu.ru");
+            }
+
+            name = name.Trim(); // Удаляем лишние пробелы
+
+            // Ищем пользователя в базе данных
+            User user = await _context.Users
+                .FirstOrDefaultAsync(u => u.mName.Equals(name));
+
+           
+
+            // Если не нашли пользователя, то надо регистрировать
+            if (user == null)
+            {
+                user = new User
                 {
-                    name = name.Trim(); // Удаляем лишние пробелы
+                    mName = name,
+                    Password = password
+                };
 
-                    // Ищем пользователя в базе данных
-                    User user = await _context.Users
-                        .FirstOrDefaultAsync(u => u.mName == name);
+                _context.Users.Add(user);
 
-                    // Если не нашли пользователя, то надо регистрировать
-                    if (user == null)
-                    {
-                        user = new User
-                        {
-                            mName = name
-                        };
-
-                        _context.Users.Add(user);
-
-                        await _context.SaveChangesAsync();
-                    }
-                    await Authenticate(user);
-
-                    StaticData.Me = user;
-                    return RedirectToAction("Index", "Home");
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                if (user.Password == null)
+                {
+                    user.Password = password;
+                    await _context.SaveChangesAsync();
                 }
-                else
+                if (!user.Password.Equals(password))
                 {
-                    // Если ФИО нет в ссылке, то переходим на сайт КубГУ
-                    return RedirectToAction("Login", "Authorization");
+                    return Redirect("https://kubsu.ru");
                 }
             }
-            return View();
+            await Authenticate(user);
+
+            StaticData.Me = user;
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
