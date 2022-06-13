@@ -5,16 +5,16 @@
     List<string> answers;
     string style = "visibility:hidden;";
     string numbersOfAnswers = "";
-    ViewData["Title"] = "Тест " + @StaticData.header.Title;
+    ViewData["Title"] = "Тест " + @ViewBag.header.Title;
 }
 <div class="testCard">
-    <h3 style="margin-bottom:50px;">@StaticData.header.Title</h3>
+    <h3 style="margin-bottom:50px;">@ViewBag.header.Title</h3>
     <div id="timerVisual"></div>
     <div id="startCard">
         <p>Зелёная полоска сверху &#8593; это таймер, после нажатия кнопки "Начать"<br />он 
             начнет уменьшаться.</p>
-        <h3>Название теста: @StaticData.header.Title</h3>
-        <h3>Описание: @StaticData.header.Description</h3>
+        <h3>Название теста: @ViewBag.header.Title</h3>
+        <h3>Описание: @ViewBag.header.Description</h3>
         <p>Вопросов @Model.Count</p>
         @{
             int timeMin = Model.Count * 40 / 60, timeSec = Model.Count * 40 % 60;
@@ -48,10 +48,11 @@
         <div id="Result" class="questionCard" style="visibility:hidden;">
             <h3 id=testResult></h3>
             <form asp-action="ThrowData" asp-controller="Test" asp-anti-forgery="true">
+                <input type="hidden" name="id" value="@ViewBag.ChoosedHeader" />
                 <h3 id="testResult"></h3>
                 <p id="countOfTrue"></p>
-                <input type="hidden" name ="countToDB" id="countOfTrueDB">
-                <input type="submit" class="finishBtn" value="Завершить">
+                <input type="hidden" name ="countToDB" id="countOfTrueDB" />
+                <input type="submit" class="finishBtn" value="Завершить" />
             </form>
         </div>
         <p id="TestP"></p>

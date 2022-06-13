@@ -17,7 +17,7 @@
             @{
                 if(!string.IsNullOrEmpty(user.Email))
                 {
-                    if (user.Id == StaticData.Me.Id)
+                    if (user.Id == ViewBag.ActiveUser.Id)
                     {
                         <p style="color:rgb(60, 205, 90);">Почта привязана!</p>
                     }
@@ -25,7 +25,7 @@
                 }
                 else
                 {
-                    if (user.Id == StaticData.Me.Id)
+                    if (user.Id == ViewBag.ActiveUser.Id)
                     {
                         <p style="color:rgb(156, 155, 53);">! Для устранения возможных проблем при входе, пожалуйста, привяжите почту !</p>
                         <form asp-action="AddMail" asp-controller="Account">
@@ -61,7 +61,7 @@
         </div>
     </div>
     @{
-        if (StaticData.Me.Id == user.Id)
+        if (ViewBag.ActiveUser.Id == user.Id)
         {
             <div class="logout">
                 <a asp-area="" asp-controller="Authorization" asp-action="SignOut">Выход</a>

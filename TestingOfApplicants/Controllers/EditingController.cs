@@ -12,20 +12,39 @@ namespace TestingOfApplicants.Controllers
     public class EditingController : Controller
     {
         ApplicationContext _context;
+        private User _user = null;
 
         public EditingController(ApplicationContext context)
         {
             _context = context;
         }
 
+        private User GetUser()
+        {
+            User user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+            }
+            catch
+            {
+                return null;
+            }
+            ViewBag.ActiveUser = user;
+            return user;
+        }
+
+        [HttpGet]
         public ActionResult CreateTest()
         {
-            if (StaticData.Me == null)
+            _user = GetUser();
+
+            if (_user == null)
             {
                 return RedirectToAction("Login", "Authorization");
             }
 
-            if (StaticData.Me.Role < 1)
+            if (_user.Role < 1)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -37,62 +56,59 @@ namespace TestingOfApplicants.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> CreateTest(int theme, string title, string description)
         {
-            try
-            {
-                if (StaticData.Me == null)
-                {
-                    return RedirectToAction("Login", "Authorization");
-                }
+            _user = GetUser();
 
-                if (!ModelState.IsValid || StaticData.Me.Role < 1)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-
-                try
-                {
-                    title = title.Trim();
-                    description = description.Trim();
-                }
-                catch
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-
-                if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(description))
-                {
-                    return View();
-                }
-
-                TestHeader testHeader = new TestHeader()
-                {
-                    Title = title,
-                    Description = description,
-                    Subjectid = theme
-                };
-                _context.TestHeaders.Add(testHeader);
-
-                await _context.SaveChangesAsync();
-
-                ViewBag.selectedSubject = theme;
-
-                return RedirectToAction("Edit", "Editing", 
-                    new {id = _context.TestHeaders.FirstOrDefault(x=>x.Title.Equals(title)).Id});
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        public async Task <IActionResult> Edit(int id)
-        {
-            if (StaticData.Me == null)
+            if (_user == null)
             {
                 return RedirectToAction("Login", "Authorization");
             }
 
-            if (StaticData.Me.Role < 1)
+            if (!ModelState.IsValid || _user.Role < 1)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            try
+            {
+                title = title.Trim();
+                description = description.Trim();
+            }
+            catch
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            if (string.IsNullOrEmpty(title) || string.IsNullOrEmpty(description) || string.IsNullOrEmpty(theme.ToString()))
+            {
+                return View();
+            }
+
+            TestHeader testHeader = new TestHeader()
+            {
+                Title = title,
+                Description = description,
+                Subjectid = theme
+            };
+            _context.TestHeaders.Add(testHeader);
+
+            await _context.SaveChangesAsync();
+
+            ViewBag.selectedSubject = theme;
+
+            return RedirectToAction("Edit", "Editing",
+                new { id = _context.TestHeaders.FirstOrDefault(x => x.Title.Equals(title)).Id });
+        }
+
+        public async Task <IActionResult> Edit(int id)
+        {
+            _user = GetUser();
+
+            if (_user == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if (_user.Role < 1)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -104,30 +120,39 @@ namespace TestingOfApplicants.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            StaticData.ChoosedHeader = id;
+            ViewBag.ChoosedHeader = id;
             ViewBag.selectedSubject = header.Subjectid;
             return View(header);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit(int theme, string title, string description, string ask, string fakeAnswer1, string fakeAnswer2, string fakeAnswer3, string Answ)
+        public async Task<ActionResult> Edit(int id, int theme, string title, string description, string ask, string fakeAnswer1, string fakeAnswer2, string fakeAnswer3, string Answ)
         {
-            if (StaticData.Me.Role < 1)
+            _user = GetUser();
+            if (_user == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if (_user.Role < 1)
             {
                 return RedirectToAction("Index", "Home");
             }
+
             try
             {
-                if (!string.IsNullOrEmpty(ask)
-                    && !string.IsNullOrEmpty(fakeAnswer1)
-                    && !string.IsNullOrEmpty(fakeAnswer2)
-                    && !string.IsNullOrEmpty(fakeAnswer3)
-                    && !string.IsNullOrEmpty(Answ))
+                var header = await _context.TestHeaders.FirstOrDefaultAsync(x => x.Id == id);
+
+                if (!string.IsNullOrEmpty(ask.Trim())
+                    && !string.IsNullOrEmpty(fakeAnswer1.Trim())
+                    && !string.IsNullOrEmpty(fakeAnswer2.Trim())
+                    && !string.IsNullOrEmpty(fakeAnswer3.Trim())
+                    && !string.IsNullOrEmpty(Answ.Trim()))
                 {
                     Question questionForAdd = new Question()
                     {
-                        HeaderId = StaticData.ChoosedHeader,
+                        HeaderId = header.Id,
                         Ask = ask,
                         FakeAnswer1 = fakeAnswer1,
                         FakeAnswer2 = fakeAnswer2,
@@ -136,8 +161,6 @@ namespace TestingOfApplicants.Controllers
                     };
                     _context.Questions.Add(questionForAdd);
                 }
-
-                TestHeader header = _context.TestHeaders.Where(x => x.Id == StaticData.ChoosedHeader).FirstOrDefault();
 
                 if (header != null)
                 {
@@ -151,7 +174,7 @@ namespace TestingOfApplicants.Controllers
                 _context.Update(header);
                 await _context.SaveChangesAsync();
                 ViewBag.selectedSubject = theme;
-                return RedirectToAction("Edit", "Editing", new { id = StaticData.ChoosedHeader });
+                return RedirectToAction("Edit", "Editing", new { id = header.Id });
             }
             catch
             {
@@ -162,21 +185,25 @@ namespace TestingOfApplicants.Controllers
         [HttpGet]
         public async Task<IActionResult> QuestionDetails(int id)
         {
-            if (StaticData.Me == null)
+            _user = GetUser();
+            
+            if (_user == null)
             {
                 return RedirectToAction("Login", "Authorization");
             }
-            if (StaticData.Me.Role < 1)
+
+            if (_user.Role < 1)
             {
                 return RedirectToAction("Index", "Home");
             }
+
             try
             {
                 var question = await _context.Questions.FirstOrDefaultAsync(x => x.Id == id);
                 var header = await _context.TestHeaders.FirstOrDefaultAsync(x => x.Id == question.HeaderId);
                 ViewBag.Question = question;
 
-                StaticData.QuestionOnEdit = new Question
+                ViewBag.QuestionOnEdit = new Question
                 {
                     Ask = question.Ask,
                     Id = question.Id,
@@ -198,20 +225,23 @@ namespace TestingOfApplicants.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateQuestion(string ask, string fakeAnswer1, string fakeAnswer2, string fakeAnswer3, string answ)
+        public async Task<IActionResult> UpdateQuestion(int id, string ask, string fakeAnswer1, string fakeAnswer2, string fakeAnswer3, string answ)
         {
-            if (StaticData.Me == null)
+            _user = GetUser();
+
+            if (_user == null)
             {
                 return RedirectToAction("Login", "Authorization");
             }
-            if (StaticData.Me.Role < 1)
+            if (_user.Role < 1)
             {
                 return RedirectToAction("Index", "Home");
             }
 
             try
             {
-                Question question = StaticData.QuestionOnEdit;
+                Question question = null;
+                question = await _context.Questions.FirstOrDefaultAsync(x=>x.Id == id);
 
                 question.Ask = ask;
                 question.FakeAnswer1 = fakeAnswer1;
@@ -220,10 +250,9 @@ namespace TestingOfApplicants.Controllers
                 question.Answer = answ;
 
                 _context.Questions.Update(question);
-                await _context.SaveChangesAsync();
+                _context.SaveChanges();
 
-                StaticData.QuestionOnEdit = null;
-                return RedirectToAction("TestDetails", "Statistics");
+                return RedirectToAction("TestDetails", "Statistics", new { id = question.HeaderId });
             }
             catch
             {
@@ -233,24 +262,26 @@ namespace TestingOfApplicants.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteQuestion()
+        public async Task<IActionResult> DeleteQuestion(int id)
         {
-            if (StaticData.Me == null)
+            _user = GetUser();
+
+            if (_user == null)
             {
                 return RedirectToAction("Login", "Authorization");
             }
-            if (StaticData.Me.Role < 1)
+            if (_user.Role < 1)
             {
                 return RedirectToAction("Index", "Home");
             }
 
             try
             {
-                _context.Questions.Remove(StaticData.QuestionOnEdit);
+                var question = await _context.Questions.FirstOrDefaultAsync(x=>x.Id == id);
+                _context.Questions.Remove(question);
                 await _context.SaveChangesAsync();
-                StaticData.QuestionOnEdit = null;
 
-                return RedirectToAction("TestDetails", "Statistics");
+                return RedirectToAction("TestDetails", "Statistics", new {id = question.HeaderId});
             }
             catch
             {

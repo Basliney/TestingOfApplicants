@@ -59,7 +59,6 @@ namespace TestingOfApplicants.Controllers
         [HttpGet]
         new public async Task<IActionResult> SignOut()
         {
-            StaticData.Me = null;
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("SignIn", "Authorization");
         }

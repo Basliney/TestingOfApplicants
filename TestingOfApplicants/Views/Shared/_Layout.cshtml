@@ -2,7 +2,7 @@
 @using System.Security.Claims
 
 @{
-    var me = StaticData.Me;
+    var me = ViewBag.ActiveUser;
 }
 
 <!DOCTYPE html>
@@ -33,14 +33,14 @@
                             <a class="nav-link text-light" asp-area="" asp-controller="Home" asp-action="Index">Тесты</a>
                         </li>
                         @{
-                            if (StaticData.Me != null)
+                            if (ViewBag.ActiveUser != null)
                             {
-                                if (StaticData.Me.Role != 0)
+                                if (ViewBag.ActiveUser.Role != 0)
                                 {
                                     <li class="nav-item">
                                         <a class="nav-link text-light" asp-area="" asp-controller="Editing" asp-action="CreateTest">Добавить тест</a>
                                     </li>
-                                    if (StaticData.Me.Role >= 2)
+                                    if (ViewBag.ActiveUser.Role >= 1)
                                     {
                                         <li class="nav-item">
                                             <a class="nav-link text-light" asp-area="" asp-controller="Statistics" asp-action="AllStatistics">Статистика</a>
@@ -53,7 +53,7 @@
                 </div>
                 <div>
                     @{
-                        if (StaticData.Me != null)
+                        if (ViewBag.ActiveUser != null)
                         {
                             <a class="navbar-brand text-light" href="@Url.ActionLink("UserInfo", "User", new {id=me.Id})">@me.mName
                             <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" style="width:67px;"/></a>

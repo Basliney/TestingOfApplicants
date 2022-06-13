@@ -22,5 +22,10 @@ namespace TestingOfApplicants.Models
             //Database.Migrate();
             Database.EnsureCreated();
         }
+
+        public ApplicationContext()
+        {
+
+        }
     }
 }

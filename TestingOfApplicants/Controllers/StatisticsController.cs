@@ -20,12 +20,22 @@ namespace TestingOfApplicants.Controllers
 
         public ActionResult AllStatistics()
         {
-            if (StaticData.Me == null)
+            User user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+            }
+            catch
             {
                 return RedirectToAction("Login", "Authorization");
             }
 
-            if (StaticData.Me.Role != 2)
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if (_context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name)).Role != 2)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -47,6 +57,7 @@ namespace TestingOfApplicants.Controllers
                              select d;
 
             AllStatistics statistics = new AllStatistics(userList, completedTests, headers);
+            ViewBag.ActiveUser = user;
             ViewBag.Subjects = subjects;
             ViewBag.Questions = _context.Questions.ToList();
             ViewBag.Headers = sortedDict;
@@ -56,16 +67,27 @@ namespace TestingOfApplicants.Controllers
 
         public IActionResult DisplaySearchResults(string FIOfinder)
         {
-            if (StaticData.Me == null)
+            User user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+            }
+            catch
             {
                 return RedirectToAction("Login", "Authorization");
             }
 
-            if (StaticData.Me.Role < 2 || string.IsNullOrEmpty(FIOfinder))
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if (user.Role < 2 || string.IsNullOrEmpty(FIOfinder))
             {
                 return RedirectToAction("AllStatistics", "Statistics");
             }
 
+            ViewBag.ActiveUser = user;
             List<User> userList = _context.Users.Where(x => x.mName.ToLower().Contains(FIOfinder.ToLower())).ToList();
 
             return View(userList);
@@ -75,18 +97,28 @@ namespace TestingOfApplicants.Controllers
         [HttpGet]
         public async Task<IActionResult> TestDetails(int id)
         {
-            if (StaticData.Me == null)
+            User user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+            }
+            catch
             {
                 return RedirectToAction("Login", "Authorization");
             }
 
-            if (StaticData.Me.Role < 1)
+            if (_context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name)) == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if (_context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name)).Role < 1)
             {
                 return RedirectToAction("AllStatistics", "Statistics");
             }
 
-            try
-            {
+            //try
+            //{
                 List<User> users = new List<User>();
 
                 List<CompletedTestDto> tests = _context.CompletedTestsDto.Where(x => x.TestId == id).ToList();
@@ -100,17 +132,18 @@ namespace TestingOfApplicants.Controllers
                 var subject = await _context.subjects.FirstOrDefaultAsync(x => x.id == test.Subjectid);
                 List<Question> questions = _context.Questions.Where(x => x.HeaderId == id).ToList();
 
+                ViewBag.ActiveUser = user;
                 ViewBag.Questions = questions;
                 ViewBag.Test = test;
                 ViewBag.Users = users;
                 ViewBag.CompletedTests = tests;
                 ViewBag.Subject = subject;
                 return View();
-            }
-            catch
-            {
-                return RedirectToAction("AllStatistics", "Statistics");
-            }
+            //}
+            //catch
+            //{
+            //    return RedirectToAction("AllStatistics", "Statistics");
+            //}
         }
     }
 }

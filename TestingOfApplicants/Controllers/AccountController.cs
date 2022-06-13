@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TestingOfApplicants.Models;
@@ -78,25 +79,19 @@ namespace TestingOfApplicants.Controllers
             }
             await Authenticate(user);
 
-            StaticData.Me = user;
             return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
         public async Task<IActionResult> AddMail([FromForm] string mail)
         {
-            if (StaticData.Me == null)
-            {
-                return RedirectToAction("Login", "Authorization");
-            }
-
             if (await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(mail)) == null){
-                StaticData.Me.Email = mail;
-                _context.Users.Update(StaticData.Me);
+                _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name)).Email = mail;
+                _context.Users.Update(_context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name)));
                 await _context.SaveChangesAsync();
             }
 
-            return RedirectToAction("UserInfo", "User", new { id = StaticData.Me.Id });
+            return RedirectToAction("UserInfo", "User", new { id = _context.Users.FirstOrDefault(x=>x.Email.Equals(HttpContext.User.Identity.Name)).Id});
         }
 
         private async Task Authenticate(User user)
@@ -104,7 +99,7 @@ namespace TestingOfApplicants.Controllers
             // создаем один claim
             var claims = new List<Claim>
             {
-                new Claim(ClaimsIdentity.DefaultNameClaimType, user.mName)
+                new Claim(ClaimsIdentity.DefaultNameClaimType, user.Email)
             };
             // создаем объект ClaimsIdentity
             ClaimsIdentity id = new ClaimsIdentity(claims, "ApplicationCookie", ClaimsIdentity.DefaultNameClaimType,

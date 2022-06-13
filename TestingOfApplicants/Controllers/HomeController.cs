@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TestingOfApplicants.Models;
@@ -17,34 +18,42 @@ namespace TestingOfApplicants.Controllers
 
         private readonly ILogger<HomeController> _logger;
 
+        private User activeUser { get; set; }
+
         public HomeController(ILogger<HomeController> logger, ApplicationContext context)
         {
             this._context = context;
             _logger = logger;
+            if (HttpContext == null)
+            {
+                RedirectToAction("Login", "Authorization");
+            }
+            else
+            {
+                activeUser = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+                ViewBag.AcriveUser = activeUser;
+            }
         }
         public async Task<IActionResult> Index()
         {
-            if (StaticData.Me == null)
+            try
             {
-                try
-                {
-                    var user = User.FindFirst(x => x.Type == ClaimsIdentity.DefaultNameClaimType);
+                var user = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+                ViewBag.ActiveUser = user;
 
-                    if (user == null) { return RedirectToAction("Login", "Authorization"); }
+                if (user == null) { return RedirectToAction("Login", "Authorization"); }
 
-                    string myName = user.Value.ToString();
-
-                    StaticData.Me = await _context.Users
-                        .FirstOrDefaultAsync(x => x.mName.Equals(myName));
-                }
-                catch(NullReferenceException e)
-                {
-                    _logger.LogError(e.StackTrace);
-                    return RedirectToAction("Login", "Authorization");
-                }
+                string myName = user.mName.ToString();
             }
+            catch (NullReferenceException e)
+            {
+                _logger.LogError(e.StackTrace);
+                return RedirectToAction("Login", "Authorization");
+            }
+
             List<TestHeader> testHeaders = await _context.TestHeaders.ToListAsync();
-            StaticData.completedTestsDto = await _context.CompletedTestsDto.ToListAsync();
+
+            ViewBag.completedTestsDto = await _context.CompletedTestsDto.ToListAsync();
 
             return View(testHeaders);
         }

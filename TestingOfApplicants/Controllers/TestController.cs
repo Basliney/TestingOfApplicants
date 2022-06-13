@@ -16,6 +16,7 @@ namespace TestingOfApplicants.Controllers
     public class TestController : Controller
     {
         ApplicationContext _context;    // Получение БД
+        private User activeUser = null;
 
         /// <summary>
         /// Конструктор класса
@@ -34,18 +35,19 @@ namespace TestingOfApplicants.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(int id)
         {
-            if (StaticData.Me == null)
+            if (ViewBag.ActiveUser == null)
             {
-                return RedirectToAction("Login", "Authorization");
+                activeUser = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+                ViewBag.ActiveUser = activeUser;
             }
 
-            if(await _context.TestHeaders.FirstOrDefaultAsync(x=>x.Id == id) == null)
+            if (await _context.TestHeaders.FirstOrDefaultAsync(x=>x.Id == id) == null)
             {
                 return RedirectToAction("Index", "Home");
             }
 
             // Если Пользователь еще не прошел этот тест
-            if (await _context.CompletedTestsDto.FirstOrDefaultAsync(x => (x.TestId == id && x.UserId == StaticData.Me.Id)) == null)
+            if (await _context.CompletedTestsDto.FirstOrDefaultAsync(x => (x.TestId == id && x.UserId == _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name)).Id)) == null)
             {
                 List<Question> questionList = new List<Question>(); // Объявляем список вопросов
                 questionList.AddRange(_context.Questions.Where(x => x.HeaderId == id)); // Заносим в список вопросы этого теста
@@ -53,8 +55,8 @@ namespace TestingOfApplicants.Controllers
                 // Если вопросов минимум 5
                 if (questionList.Count >= 5)
                 {
-                    StaticData.ChoosedHeader = id;  //Запоминаем id теста
-                    StaticData.header = _context.TestHeaders.Where(x => x.Id == id).FirstOrDefault();   // Запоминаем шапку теста
+                    ViewBag.ChoosedHeader = id;  //Запоминаем id теста
+                    ViewBag.header = _context.TestHeaders.Where(x => x.Id == id).FirstOrDefault();   // Запоминаем шапку теста
                     return View(questionList);  // Вызываем вьюшку
                 }
             }
@@ -69,7 +71,7 @@ namespace TestingOfApplicants.Controllers
         /// <returns>Возврат на главную страницу</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ThrowData(string countToDB)
+        public async Task<ActionResult> ThrowData(int id, string countToDB)
         {
             try
             {
@@ -83,11 +85,12 @@ namespace TestingOfApplicants.Controllers
                 // Если процент минимум 80 и предыдущие этапы не запретили запись
                 if (count >= 80 && canWrite == true)
                 {
+                    var header = await _context.TestHeaders.FirstOrDefaultAsync(x => x.Id == id);
                     //Создаем объект завершенного теста
                     CompletedTestDto completedTestDto = new CompletedTestDto()
                     {
-                        TestId = StaticData.ChoosedHeader,
-                        UserId = StaticData.Me.Id,
+                        TestId = id,
+                        UserId = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name)).Id,
                         CountByPersent = count
                     };
 
@@ -96,12 +99,11 @@ namespace TestingOfApplicants.Controllers
                     await _context.SaveChangesAsync();  // Сохраняем изменения
                 }
 
-                StaticData.ChoosedHeader = -1;
                 return RedirectToAction("Index", "Home");
             }
             catch
             {
-                return RedirectToAction("Index", "Test", new { id = StaticData.ChoosedHeader });   // Возвращаемся на страницу старта теста
+                return RedirectToAction("Index", "Test", new { id = id });   // Возвращаемся на страницу старта теста
             }
         }
     }

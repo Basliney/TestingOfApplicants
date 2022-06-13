@@ -27,6 +27,7 @@
 
 <div id="EditBlock">
     <form asp-action="Edit" asp-controller="Editing" asp-anti-forgery="true">
+        <input type="hidden" name="id" value="@ViewBag.ChoosedHeader" />
         <label>Тема:</label><br />
         <input type="radio" id="choice1" name="theme" value="1" @checking(1) onclick="onChangeCheck(1)"/>
         <label for="choice1">Искусственный Интеллект</label><br />

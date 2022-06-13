@@ -31,6 +31,7 @@
     <p>[id - @header.Id] @header.Title</p>
     <form asp-action="UpdateQuestion" asp-controller="Editing">
         <h3>Вопрос:</h3>
+        <input type="hidden" name="id" value="@ViewBag.QuestionOnEdit.Id" />
         <textarea name="ask" class="editText" id="ask" style="max-height:200px; height:max-content;" placeholder="Введите вопрос" oninput="checkFill()">@question.Ask</textarea>
         <p>Неверные ответы:</p>
         <p>1.<input type="text" id="fake1" name="fakeAnswer1" class="editText" placeholder="Введите неверный ответ"oninput="checkFill()" value="@question.FakeAnswer1"/></p><br />
@@ -42,6 +43,7 @@
         <input type="submit" id="add-question-btn" disabled="disabled" value="Обновить вопрос"/>
     </form>
     <form asp-action="DeleteQuestion" asp-controller="Editing" style="margin-top:20px">
+        <input type="hidden" name = "id" value="@ViewBag.QuestionOnEdit.Id" />
         <input type="submit" id="delete-question-btn" value="Удалить вопрос" />
     </form>
 </div>

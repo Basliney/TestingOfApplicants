@@ -11,20 +11,42 @@ namespace TestingOfApplicants.Controllers
     public class UserController : Controller
     {
         private ApplicationContext _context;
+        private User _user = null;
+
+        private User activeUser { get; set; } = null;
 
         public UserController(ApplicationContext context)
         {
             _context = context;
         }
 
+        private User GetUser()
+        {
+            User user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+            }
+            catch
+            {
+                return null;
+            }
+            ViewBag.ActiveUser = user;
+            return user;
+        }
+
+        [HttpGet]
         public async Task <IActionResult> UserInfo(int id)
         {
-            if (StaticData.Me == null)
+            _user = GetUser();
+
+            if (_user == null)
             {
                 return RedirectToAction("Login", "Authorization");
             }
 
-            if (id != StaticData.Me.Id && StaticData.Me.Role < 2)
+            //Поправить куку
+            if (id != _user.Id && _user.Role < 2)
             {
                 return RedirectToAction("Index", "Home");
             }
