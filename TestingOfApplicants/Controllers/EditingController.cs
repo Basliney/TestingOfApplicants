@@ -24,7 +24,7 @@ namespace TestingOfApplicants.Controllers
             User user = null;
             try
             {
-                user = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+                user = _context.Users.FirstOrDefault(x => x.Id.Equals(int.Parse(HttpContext.User.Identity.Name)));
             }
             catch
             {

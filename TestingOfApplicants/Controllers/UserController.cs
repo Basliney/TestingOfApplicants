@@ -13,8 +13,6 @@ namespace TestingOfApplicants.Controllers
         private ApplicationContext _context;
         private User _user = null;
 
-        private User activeUser { get; set; } = null;
-
         public UserController(ApplicationContext context)
         {
             _context = context;
@@ -25,7 +23,7 @@ namespace TestingOfApplicants.Controllers
             User user = null;
             try
             {
-                user = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
+                user = _context.Users.FirstOrDefault(x => x.Id.Equals(int.Parse(HttpContext.User.Identity.Name)));
             }
             catch
             {
@@ -45,7 +43,6 @@ namespace TestingOfApplicants.Controllers
                 return RedirectToAction("Login", "Authorization");
             }
 
-            //Поправить куку
             if (id != _user.Id && _user.Role < 2)
             {
                 return RedirectToAction("Index", "Home");

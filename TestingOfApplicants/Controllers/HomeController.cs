@@ -18,36 +18,33 @@ namespace TestingOfApplicants.Controllers
 
         private readonly ILogger<HomeController> _logger;
 
-        private User activeUser { get; set; }
+        private User _user { get; set; }
+
+        private User GetUser()
+        {
+            User user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(x => x.Id.Equals(int.Parse(HttpContext.User.Identity.Name)));
+            }
+            catch
+            {
+                return null;
+            }
+            ViewBag.ActiveUser = user;
+            return user;
+        }
 
         public HomeController(ILogger<HomeController> logger, ApplicationContext context)
         {
             this._context = context;
             _logger = logger;
-            if (HttpContext == null)
-            {
-                RedirectToAction("Login", "Authorization");
-            }
-            else
-            {
-                activeUser = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
-                ViewBag.AcriveUser = activeUser;
-            }
         }
         public async Task<IActionResult> Index()
         {
-            try
+            _user = GetUser();
+            if (_user == null)
             {
-                var user = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
-                ViewBag.ActiveUser = user;
-
-                if (user == null) { return RedirectToAction("Login", "Authorization"); }
-
-                string myName = user.mName.ToString();
-            }
-            catch (NullReferenceException e)
-            {
-                _logger.LogError(e.StackTrace);
                 return RedirectToAction("Login", "Authorization");
             }
 

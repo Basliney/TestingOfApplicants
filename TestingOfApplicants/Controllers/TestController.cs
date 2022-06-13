@@ -16,7 +16,7 @@ namespace TestingOfApplicants.Controllers
     public class TestController : Controller
     {
         ApplicationContext _context;    // Получение БД
-        private User activeUser = null;
+        private User _user = null;
 
         /// <summary>
         /// Конструктор класса
@@ -27,6 +27,21 @@ namespace TestingOfApplicants.Controllers
             this._context = context;
         }
 
+        private User GetUser()
+        {
+            User user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(x => x.Id.Equals(int.Parse(HttpContext.User.Identity.Name)));
+            }
+            catch
+            {
+                return null;
+            }
+            ViewBag.ActiveUser = user;
+            return user;
+        }
+
         /// <summary>
         /// Обработка Get запроса
         /// </summary>
@@ -35,10 +50,11 @@ namespace TestingOfApplicants.Controllers
         [HttpGet]
         public async Task<ActionResult> Index(int id)
         {
-            if (ViewBag.ActiveUser == null)
+            _user = GetUser();
+
+            if (_user == null)
             {
-                activeUser = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name));
-                ViewBag.ActiveUser = activeUser;
+                return RedirectToAction("Login", "Authorization");
             }
 
             if (await _context.TestHeaders.FirstOrDefaultAsync(x=>x.Id == id) == null)
@@ -73,6 +89,12 @@ namespace TestingOfApplicants.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> ThrowData(int id, string countToDB)
         {
+            _user = GetUser();
+            if (_user == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
             try
             {
                 bool canWrite = !ModelState.IsValid;
