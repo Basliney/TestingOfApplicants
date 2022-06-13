@@ -48,7 +48,7 @@ namespace TestingOfApplicants.Controllers
                 };
                 _context.Users.Add(user);
                 _context.SaveChanges();
-                return RedirectToAction("Login", "Account", new { name = user.mName, password=authorize_password });
+                return RedirectToAction("LoginFromAuthorize", "Account", new { name = user.mName, mail = mail, password = authorize_password });
             }
             catch
             {
@@ -88,7 +88,7 @@ namespace TestingOfApplicants.Controllers
                 {
                     throw new Exception();
                 }
-                return RedirectToAction("Login", "Account", new { name = user.mName, password=authorize_password });
+                return RedirectToAction("LoginFromAuthorize", "Account", new { name = string.Empty, mail = mail, password = authorize_password });
             }
             catch
             {

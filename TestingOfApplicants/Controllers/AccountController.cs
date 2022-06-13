@@ -50,8 +50,6 @@ namespace TestingOfApplicants.Controllers
             User user = await _context.Users
                 .FirstOrDefaultAsync(u => u.mName.Equals(name));
 
-           
-
             // Если не нашли пользователя, то надо регистрировать
             if (user == null)
             {
@@ -62,7 +60,6 @@ namespace TestingOfApplicants.Controllers
                 };
 
                 _context.Users.Add(user);
-
                 await _context.SaveChangesAsync();
             }
             else
@@ -78,7 +75,43 @@ namespace TestingOfApplicants.Controllers
                 }
             }
             await Authenticate(user);
+            return RedirectToAction("Index", "Home");
+        }
 
+        public async Task<IActionResult> LoginFromAuthorize([FromQuery] string name, [FromQuery] string mail, [FromQuery] string password)
+        {
+            if(string.IsNullOrEmpty(password) || string.IsNullOrEmpty(mail))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            User user = await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(mail)
+                && x.Password.Equals(password));
+
+            // Если null надо регать
+            if (user == null)
+            {
+                if (string.IsNullOrEmpty(name))
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+
+                user = new User
+                {
+                    mName = name,
+                    Email = mail,
+                    Password = password,
+                    Role = 0
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                user = await _context.Users.FirstOrDefaultAsync(x => x.Email.Equals(mail) 
+                    && x.Password.Equals(password));
+            }
+
+            await Authenticate(user);
             return RedirectToAction("Index", "Home");
         }
 

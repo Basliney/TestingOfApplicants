@@ -128,5 +128,54 @@ namespace TestingOfApplicants.Controllers
                 return RedirectToAction("Index", "Test", new { id = id });   // Возвращаемся на страницу старта теста
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            _user = GetUser();
+            if (_user == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if (_user.Role < 1)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            TestHeader test = null;
+            List<Question> questions = new List<Question>();
+
+            try
+            {
+                test = await _context.TestHeaders.FirstOrDefaultAsync(x => x.Id == id);
+
+                if (test == null)
+                {
+                    throw new Exception();
+                }
+
+                questions = _context.Questions.Where(x => x.HeaderId == id).ToList();
+
+                if (questions.Count > 0)
+                {
+                    foreach (var item in questions)
+                    {
+                        _context.Questions.Remove(item);
+                    }
+                }
+
+                _context.TestHeaders.Remove(test);
+
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                return RedirectToAction("Index", "Home");
+            }
+         
+            return RedirectToAction("Index", "Home");
+        }
     }
 }
