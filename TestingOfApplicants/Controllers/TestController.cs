@@ -112,7 +112,7 @@ namespace TestingOfApplicants.Controllers
                     CompletedTestDto completedTestDto = new CompletedTestDto()
                     {
                         TestId = id,
-                        UserId = _context.Users.FirstOrDefault(x => x.Email.Equals(HttpContext.User.Identity.Name)).Id,
+                        UserId = _user.Id,
                         CountByPersent = count
                     };
 
