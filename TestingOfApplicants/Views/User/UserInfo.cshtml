@@ -47,7 +47,13 @@
                                 var level = 1;
                                 foreach(var item in completedTests)
                                 {
-                                    if (headers.FirstOrDefault(x => x.Id == item.TestId).Subjectid == subject.id)
+                                    var header = headers.FirstOrDefault(x => x != null && x.Id == item.TestId);
+                                    if (header == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (header.Subjectid == subject.id)
                                     {
                                         level++;
                                     }
@@ -76,6 +82,10 @@
             <tr><th class="hidable-mobile">ID <br />теста</th><th>Название</th><th class="hidable-mobile">Предметная область</th><th>Процент<br />правильных ответов</th></tr>
             @foreach(var header in headers)
             {
+                    if(header == null)
+                    {
+                        continue;
+                    }
                 <tr><td class="hidable-mobile">@header.Id</td><td>@header.Title</td><td class="hidable-mobile">@subjects.FirstOrDefault(x=>x.id==header.Subjectid).name</td><td>@completedTests.FirstOrDefault(x=>x.TestId==header.Id).CountByPersent%</td></tr>
             }
             </table>
