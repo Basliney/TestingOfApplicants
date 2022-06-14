@@ -8,6 +8,8 @@
     List<CompletedTestDto> completedTests = ViewBag.CompletedTests;
     SubjectDto subject = ViewBag.Subject;
     List<Question> questions = ViewBag.Questions;
+
+    ViewData["Title"] = "Статистика " + @test.Title;
 }
 
 <div class="test-details">
