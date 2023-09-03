@@ -8,12 +8,24 @@
     List<CompletedTestDto> completedTests = ViewBag.CompletedTests;
     SubjectDto subject = ViewBag.Subject;
     List<Question> questions = ViewBag.Questions;
+
+    ViewData["Title"] = "Статистика " + @test.Title;
 }
 
 <div class="test-details">
-    <p>@test.Title - @subject.name</p>
-    <p>@test.Description</p>
+    <p>Название: @test.Title - @subject.name</p>
+    <p>Описание: @test.Description</p>
+    <p>Количество вопросов: @questions.Count 
+        @{
+            if (questions.Count > 0)
+            {
+                <a href="@Url.ActionLink("Edit","Editing",new{id=test.Id})">Добавить</a>
+            }
+        }
+    </p>
+    <p>Количество прохождений: @users.Count</p>
     <p class="test-details-link">@Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = test.Id})</p>
+    <p class="test-details-link">@Html.RouteLink("Удалить", new {controller = "Statistics", action = "Delete", id = test.Id})</p>
     <p class="p-questions">Вопросы:</p>
     @{
         if (questions.Count == 0)

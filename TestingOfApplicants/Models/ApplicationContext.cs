@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
 using TestingOfApplicants.Models.Tests;
 
 namespace TestingOfApplicants.Models
@@ -19,8 +17,13 @@ namespace TestingOfApplicants.Models
 
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options)
         {
-            Database.Migrate();
-            //Database.EnsureCreated();
+            //Database.Migrate();
+            Database.EnsureCreated();
+        }
+
+        public ApplicationContext()
+        {
+
         }
     }
 }

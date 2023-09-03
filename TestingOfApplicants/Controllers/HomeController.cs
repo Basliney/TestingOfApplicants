@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TestingOfApplicants.Models;
@@ -17,6 +18,23 @@ namespace TestingOfApplicants.Controllers
 
         private readonly ILogger<HomeController> _logger;
 
+        private User _user { get; set; }
+
+        private User GetUser()
+        {
+            User user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(x => x.Id.Equals(int.Parse(HttpContext.User.Identity.Name)));
+            }
+            catch
+            {
+                return null;
+            }
+            ViewBag.ActiveUser = user;
+            return user;
+        }
+
         public HomeController(ILogger<HomeController> logger, ApplicationContext context)
         {
             this._context = context;
@@ -24,27 +42,15 @@ namespace TestingOfApplicants.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            if (StaticData.Me == null)
+            _user = GetUser();
+            if (_user == null)
             {
-                try
-                {
-                    var user = User.FindFirst(x => x.Type == ClaimsIdentity.DefaultNameClaimType);
-
-                    if (user == null) { return RedirectToAction("Login", "Authorization"); }
-
-                    string myName = user.Value.ToString();
-
-                    StaticData.Me = await _context.Users
-                        .FirstOrDefaultAsync(x => x.mName.Equals(myName));
-                }
-                catch(NullReferenceException e)
-                {
-                    _logger.LogError(e.StackTrace);
-                    return RedirectToAction("Login", "Authorization");
-                }
+                return RedirectToAction("Login", "Authorization");
             }
+
             List<TestHeader> testHeaders = await _context.TestHeaders.ToListAsync();
-            StaticData.completedTestsDto = await _context.CompletedTestsDto.ToListAsync();
+
+            ViewBag.completedTestsDto = await _context.CompletedTestsDto.ToListAsync();
 
             return View(testHeaders);
         }

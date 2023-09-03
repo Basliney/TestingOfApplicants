@@ -1,17 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TestingOfApplicants.Models.Tests;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace TestingOfApplicants.Models
 {
     public static class StaticData
     {
-        public static User Me { get; set; }
-        public static int ChoosedHeader { get; set; }
-
-        public static List<CompletedTestDto> completedTestsDto { get; set; }
-
-        public static TestHeader header { get; set; }
-
-        public static Question QuestionOnEdit { get; set; }
+        
     }
 }

@@ -12,7 +12,7 @@
 
 <div class="text-center">
     <h1 class="display-4">Добро пожаловать!</h1>
-    <p>Мы рады видеть вас, @StaticData.Me.mName.Split()[1], у нас на сайте тестирования. Ниже вы можете найти все доступные тесты для прохождения</p>
+    <p>Мы рады видеть вас, @ViewBag.ActiveUser.mName.Split()[1], у нас на сайте тестирования. Ниже вы можете найти все доступные тесты для прохождения</p>
     
     <div class="row">
     @{
@@ -53,7 +53,7 @@
                             <h3 class="testHeader">@list[j].Title</h3>
                             <p class="testDescription">@list[j].Description</p>
                             @{
-                                if (StaticData.Me.Role != 0)
+                                if (ViewBag.ActiveUser.Role != 0)
                                 {
                                     @Html.RouteLink("Изменить", new {controller = "Editing", action = "Edit", id = list[j].Id})
                                 }
@@ -87,8 +87,8 @@
 
     string GetColor(int number)
     {
-        foreach (var item in StaticData.completedTestsDto) {
-            if (list[number].Id == item.TestId && item.UserId == StaticData.Me.Id)
+        foreach (var item in ViewBag.completedTestsDto) {
+            if (list[number].Id == item.TestId && item.UserId == ViewBag.ActiveUser.Id)
             {
                 var col = rnd.Next(70, 100);
                 flag = true;

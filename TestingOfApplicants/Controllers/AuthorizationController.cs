@@ -48,7 +48,7 @@ namespace TestingOfApplicants.Controllers
                 };
                 _context.Users.Add(user);
                 _context.SaveChanges();
-                return RedirectToAction("Login", "Account", new { name = user.mName });
+                return RedirectToAction("LoginFromAuthorize", "Account", new { name = user.mName, mail = mail, password = authorize_password });
             }
             catch
             {
@@ -59,7 +59,6 @@ namespace TestingOfApplicants.Controllers
         [HttpGet]
         new public async Task<IActionResult> SignOut()
         {
-            StaticData.Me = null;
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("SignIn", "Authorization");
         }
@@ -89,7 +88,7 @@ namespace TestingOfApplicants.Controllers
                 {
                     throw new Exception();
                 }
-                return RedirectToAction("Login", "Account", new { name = user.mName });
+                return RedirectToAction("LoginFromAuthorize", "Account", new { name = string.Empty, mail = mail, password = authorize_password });
             }
             catch
             {

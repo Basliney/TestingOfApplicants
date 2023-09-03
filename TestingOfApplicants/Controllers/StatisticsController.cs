@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,19 +14,37 @@ namespace TestingOfApplicants.Controllers
     public class StatisticsController : Controller
     {
         private ApplicationContext _context;
+        private User _user;
+
         public StatisticsController(ApplicationContext context)
         {
             this._context = context;
         }
 
+        private User GetUser()
+        {
+            User user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(x => x.Id.Equals(int.Parse(HttpContext.User.Identity.Name)));
+            }
+            catch
+            {
+                return null;
+            }
+            ViewBag.ActiveUser = user;
+            return user;
+        }
+
         public ActionResult AllStatistics()
         {
-            if (StaticData.Me == null)
+            _user = GetUser();
+            if (_user == null)
             {
                 return RedirectToAction("Login", "Authorization");
             }
 
-            if (StaticData.Me.Role != 2)
+            if (_user.Role != 2)
             {
                 return RedirectToAction("Index", "Home");
             }
@@ -56,12 +75,13 @@ namespace TestingOfApplicants.Controllers
 
         public IActionResult DisplaySearchResults(string FIOfinder)
         {
-            if (StaticData.Me == null)
+            _user = GetUser();
+            if (_user == null)
             {
                 return RedirectToAction("Login", "Authorization");
             }
 
-            if (StaticData.Me.Role < 2 || string.IsNullOrEmpty(FIOfinder))
+            if (_user.Role < 2 || string.IsNullOrEmpty(FIOfinder))
             {
                 return RedirectToAction("AllStatistics", "Statistics");
             }
@@ -75,12 +95,13 @@ namespace TestingOfApplicants.Controllers
         [HttpGet]
         public async Task<IActionResult> TestDetails(int id)
         {
-            if (StaticData.Me == null)
+            _user = GetUser();
+            if (_user == null)
             {
                 return RedirectToAction("Login", "Authorization");
             }
 
-            if (StaticData.Me.Role < 1)
+            if (_user.Role < 1)
             {
                 return RedirectToAction("AllStatistics", "Statistics");
             }
@@ -111,6 +132,53 @@ namespace TestingOfApplicants.Controllers
             {
                 return RedirectToAction("AllStatistics", "Statistics");
             }
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            _user = GetUser();
+            if (_user == null)
+            {
+                return RedirectToAction("Login", "Authorization");
+            }
+
+            if (_user.Role < 1)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            TestHeader test = null;
+            List<Question> questions = new List<Question>();
+
+            try
+            {
+                test = await _context.TestHeaders.FirstOrDefaultAsync(x => x.Id == id);
+
+                if (test == null)
+                {
+                    throw new Exception();
+                }
+
+                questions = _context.Questions.Where(x => x.HeaderId == id).ToList();
+
+                if (questions.Count > 0)
+                {
+                    foreach (var item in questions)
+                    {
+                        _context.Questions.Remove(item);
+                    }
+                }
+
+                _context.TestHeaders.Remove(test);
+
+                await _context.SaveChangesAsync();
+            }
+            catch
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            return RedirectToAction("AllStatistics", "Statistics");
         }
     }
 }

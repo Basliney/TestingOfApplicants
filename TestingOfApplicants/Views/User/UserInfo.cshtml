@@ -17,7 +17,7 @@
             @{
                 if(!string.IsNullOrEmpty(user.Email))
                 {
-                    if (user.Id == StaticData.Me.Id)
+                    if (user.Id == ViewBag.ActiveUser.Id)
                     {
                         <p style="color:rgb(60, 205, 90);">Почта привязана!</p>
                     }
@@ -25,7 +25,7 @@
                 }
                 else
                 {
-                    if (user.Id == StaticData.Me.Id)
+                    if (user.Id == ViewBag.ActiveUser.Id)
                     {
                         <p style="color:rgb(156, 155, 53);">! Для устранения возможных проблем при входе, пожалуйста, привяжите почту !</p>
                         <form asp-action="AddMail" asp-controller="Account">
@@ -47,7 +47,13 @@
                                 var level = 1;
                                 foreach(var item in completedTests)
                                 {
-                                    if (headers.FirstOrDefault(x => x.Id == item.TestId).Subjectid == subject.id)
+                                    var header = headers.FirstOrDefault(x => x != null && x.Id == item.TestId);
+                                    if (header == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (header.Subjectid == subject.id)
                                     {
                                         level++;
                                     }
@@ -61,7 +67,7 @@
         </div>
     </div>
     @{
-        if (StaticData.Me.Id == user.Id)
+        if (ViewBag.ActiveUser.Id == user.Id)
         {
             <div class="logout">
                 <a asp-area="" asp-controller="Authorization" asp-action="SignOut">Выход</a>
@@ -76,6 +82,10 @@
             <tr><th class="hidable-mobile">ID <br />теста</th><th>Название</th><th class="hidable-mobile">Предметная область</th><th>Процент<br />правильных ответов</th></tr>
             @foreach(var header in headers)
             {
+                    if(header == null)
+                    {
+                        continue;
+                    }
                 <tr><td class="hidable-mobile">@header.Id</td><td>@header.Title</td><td class="hidable-mobile">@subjects.FirstOrDefault(x=>x.id==header.Subjectid).name</td><td>@completedTests.FirstOrDefault(x=>x.TestId==header.Id).CountByPersent%</td></tr>
             }
             </table>
